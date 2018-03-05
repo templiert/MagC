@@ -1,0 +1,108 @@
+# MagC parameters
+# Lines that start with a single '#' are comment lines
+# lines that start with a '##### Plugin' indicate to which plugin the parameters below this line belong
+# Lines that do not start with a '#' are parameter lines and should have the following form:  'param = 36' or 'd = 'thePath' or "theList = [3, 6, 'baguette']" .'
+
+##############################
+##### Plugin preprocess_ForPipeline #####
+##############################
+# execute or not the LM and EM parts (1 - True, 0 - False)
+executeLM = 1
+executeEM = 1
+
+##############################
+##### Plugin assembly_LM #####
+##############################
+# Overlap of the LM patches in the mosaics
+overlap = 0.1
+
+# size of the neighborhood for local contrast for the brightfield channel
+normLocalContrastSize = 50
+
+# unique identifier for the reference LM channel used for LM alignment and LM/EM registration. The identifier must be contained in the name of the reference channel but not in any other channel
+refChannelIdentifier = field
+
+# for contrasting the fluo channels
+normLocalContrastSizeFluo = 2000
+
+# for thresholding the fluo channels
+minMaxFluo = [15000,65000]
+
+# flip horizontally the LM tiles
+flipHorizontally = 1
+
+###########################################
+##### Plugin montage_LM #####
+###########################################
+# mosaic dimension of tiles
+mosaic = [2,2]
+
+###########################################
+##### Plugin alignRigid_LM #####
+###########################################
+executeAlignment = 0
+
+# e.g. 0.5, use only the center part of the layer to compute alignment: 0.5 divides the x and y dimensions by 2
+boxFactor = 0.5 
+
+####################################
+##### Plugin export_LMChannels #####
+####################################
+# assembled LM mosaics will be saved to files with the following scale factors
+# /!\ Scalefactor 1 should always be included, as these images are used for LM/EM registration
+scaleFactors = [0.1,1]
+
+####################################
+##### Plugin downsample_EM #####
+####################################
+downsamplingFactor = 20
+nTilesAtATime = 400
+normLocalContrastSize = 500
+
+###########################################
+##### Plugin montage_Translation #####
+###########################################
+# Number of layers to montage by each Fiji instance
+nLayersAtATime = 2
+
+###########################################
+##### Plugin montage_ElasticEM #####
+###########################################
+# Number of layers to montage by each Fiji instance
+nLayersAtATime = 40
+nThreads = 20
+
+###########################################
+##### Plugin export_stitchedEMForAlignment #####
+###########################################
+# Number of layers to montage by each Fiji instance
+nLayersAtATime = 50
+nThreads = 10
+
+###########################################
+##### Plugin alignElastic_EM #####
+###########################################
+# Number of layers to montage by each Fiji instance
+layerOverlap = 1
+nLayersAtATime = 30
+
+###########################################
+##### Plugin export_alignedEMForRegistration #####
+###########################################
+nLayersAtATime = 40
+nThreads = 10
+
+###########################################
+##### Plugin compute_RegistrationMovingLeastSquares #####
+###########################################
+# rejection threshold for the mean displacement of the transforms for the low and high resolution steps, respectively 
+matchingThreshold = [10,10] 
+
+# number of octaves in the SIFT features search at the low and high resolution steps, respectively
+nOctaves = [1,4] 
+
+# percentage of cropping the EM box for registration. Be careful, the cropped boundaries are then "lost"
+cropBoxPercent = 0.1
+
+# on the 8-core computer (zarathustra), more than 6 makes problems when RVS is saving the images (there is a suspicious IJ.openImage in the RVS code ...)
+nLayersAtATime = 20

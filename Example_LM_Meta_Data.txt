@@ -1,0 +1,8 @@
+width = 2048
+height = 2048
+nChannels = 2
+xGrid = 1
+yGrid = 1
+scaleX = 0.107421875
+scaleY = 0.107421875
+channels = [647,brightfield]
