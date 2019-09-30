@@ -7,7 +7,8 @@ from xml.dom import minidom
 import ij
 from ij import IJ
 
-import fijiCommon as fc
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 
 namePlugin = 'preprocess_ForPipeline'
 MagCFolder = fc.startPlugin(namePlugin)
@@ -19,7 +20,6 @@ except Exception, e:
 
 sectionOrder = fc.readOrder(orderPath)
 IJ.log('sectionOrder: ' + str(sectionOrder))
-print 'sectionOrder', sectionOrder
 
 MagCParams = fc.readMagCParameters(MagCFolder)
 
@@ -61,6 +61,7 @@ if executeLM:
 			targetImageName = sourceImageName.replace('section_' + str(targetId).zfill(4) , 'section_' + str(sourceId).zfill(4))
 			sourceImagePath = os.path.join(sourceFolder, sourceImageName)
 			targetImagePath = os.path.join(targetFolder, targetImageName)
+			IJ.log('Copying \n' + sourceImagePath + '\nto\n' + targetImagePath)
 			shutil.copyfile(sourceImagePath, targetImagePath)
 	
 ##############################

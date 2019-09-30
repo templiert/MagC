@@ -2,7 +2,9 @@ from __future__ import with_statement
 from ij import IJ
 from ij import Macro
 import os, time
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 from ini.trakem2 import Project, ControlWindow
 from ini.trakem2.display import Patch
 from java.util.concurrent.atomic import AtomicInteger
@@ -14,7 +16,7 @@ def contrastImage():
 		if k < nPaths:
 			im = IJ.openImage(toContrastPaths[k][0])
 			im = fc.normLocalContrast(im, normLocalContrastSize, normLocalContrastSize, 3, True, True)
-			IJ.save(im,toContrastPaths[k][1])
+			IJ.save(im, toContrastPaths[k][1])
 			im.close()
 
 namePlugin = 'assembly_LM'
@@ -69,7 +71,8 @@ for imPath in imPaths:
 	im = IJ.openImage(imPath)
 	im = fc.minMax(im, meanMin, meanMax)
 	IJ.run(im, '8-bit', '')
-	IJ.run(im, 'Flip Horizontally', '') # {Leica DMI, NikonTiEclipse} to Merlin
+	if flipHorizontally:
+		IJ.run(im, 'Flip Horizontally', '') # {Leica DMI, NikonTiEclipse} to Merlin
 	IJ.save(im, imPath)
 	IJ.log('Image ' + imPath + ' thresholded 8-bited')
 
@@ -84,6 +87,7 @@ for (dirpath, dirnames, filenames) in os.walk(LMDataFolder):
 			IJ.run(im, '8-bit', '')
 			if flipHorizontally:
 				IJ.run(im, 'Flip Horizontally', '') # Leica DMI to Merlin
+				IJ.log('flipHorizontally')
 			IJ.save(im, imPath)
 			IJ.log('Image ' + imPath + ' processed')
 			

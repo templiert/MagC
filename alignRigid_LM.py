@@ -2,7 +2,9 @@ from ij import IJ
 from ij import Macro
 import os
 import time
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 from mpicbg.trakem2.align import RegularizedAffineLayerAlignment
 from java.awt.geom import AffineTransform
 from java.awt import Rectangle

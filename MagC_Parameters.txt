@@ -36,6 +36,8 @@ flipHorizontally = 1
 ###########################################
 # mosaic dimension of tiles
 mosaic = [2,2]
+# fraction of parallel cores used for stitching
+fractionCores = 0.1
 
 ###########################################
 ##### Plugin alignRigid_LM #####

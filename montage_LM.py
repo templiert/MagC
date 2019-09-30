@@ -2,7 +2,9 @@ from ij import IJ
 from ij import Macro
 import os
 import time
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 from mpicbg.trakem2.align import Align, AlignTask
 from ini.trakem2 import Project, ControlWindow
 from ini.trakem2.display import Patch
@@ -55,6 +57,7 @@ ControlWindow.setGUIEnabled(False)
 # get mosaic size
 MagCParameters = fc.readMagCParameters(MagCFolder)
 mosaic = MagCParameters[namePlugin]['mosaic'] # e.g. [2,2]
+fractionCores = MagCParameters[namePlugin]['fractionCores']
 
 if mosaic !=[1,1]:
 	projectPath = fc.findFilesFromTags(MagCFolder,['LMProject'])[0]
@@ -65,7 +68,7 @@ if mosaic !=[1,1]:
 	nLayers = len(layerset.getLayers())
 
 	atomicI = AtomicInteger(0)			
-	fc.startThreads(stitchLayers, fractionCores = 0.1)
+	fc.startThreads(stitchLayers, fractionCores = fractionCores)
 	fc.resizeDisplay(layerset)
 	project.save()
 	fc.closeProject(project)

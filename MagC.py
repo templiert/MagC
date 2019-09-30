@@ -1,5 +1,6 @@
 # orchestrator script that launches all scripts for MagC
-import Tkinter, tkFileDialog
+import tkinter
+from tkinter import filedialog
 import os, sys, time
 import shutil
 import subprocess
@@ -9,19 +10,19 @@ import argparse
 import platform
 
 def getDirectory(text):
-	root = Tkinter.Tk()
+	root = tkinter.Tk()
 	root.withdraw()
-	path = tkFileDialog.askdirectory(title = text) + os.sep
+	path = filedialog.askdirectory(title = text) + os.sep
 	path = os.path.join(path, '')
 	return path
 
 def askFile(*args):
-	root = Tkinter.Tk()
+	root = tkinter.Tk()
 	root.withdraw()
 	if len(args) == 1:
-		path =  tkFileDialog.askopenfilename(title = args[0])
+		path =  filedialog.askopenfilename(title = args[0])
 	else:
-		path = tkFileDialog.askopenfilename(title = args[0], initialdir = args[1])
+		path = filedialog.askopenfilename(title = args[0], initialdir = args[1])
 	return path
 
 def whereAmI():
@@ -38,7 +39,7 @@ def whereIs(item, itemType, displayText, MagCScriptsFolder, isNew):
 		if itemType == 'file' and not os.path.isfile(itemPath):
 			raise IOError
 	except IOError:
-		print 'I do not know where ' + item + ' is'
+		print('I do not know where ', item, ' is')
 		if itemType == 'file':
 			itemPath = askFile(displayText)
 		elif itemType == 'folder':
@@ -110,13 +111,13 @@ def runFijiScript(plugin):
 
 	repeat = True
 	signalingPath = os.path.join(MagCFolder, 'signalingFile_' + plugin.replace(' ', '_') + '.txt')
-	print 'signalingPath', signalingPath
+	print('signalingPath', signalingPath)
 	plugin = "'" + plugin + "'"
 	arguments = cleanPathForFijiCall(MagCFolder)
 	while repeat:
-		print 'running plugin ', plugin, ' : ', str(time.strftime('%Y%m%d-%H%M%S'))
+		print('running plugin ', plugin, ' : ', str(time.strftime('%Y%m%d-%H%M%S')))
 
-		# print ' with arguments ', arguments
+		# print(' with arguments ', arguments)
 		# command = fijiPath + ' -eval ' + '"run(' + plugin + ",'" + arguments  + "'"
 
 		if fijiFlag == 0:
@@ -125,18 +126,18 @@ def runFijiScript(plugin):
 			fijiPath = fiji6Path
 
 		command = fijiPath + ' -eval ' + '"run(' + plugin + ",'" + arguments  + "'" + ')"'
-		print 'command', command
+		print('command', command)
 		if platform.system() == 'Linux':
 			p = subprocess.Popen(command, shell=True, preexec_fn = os.setsid) # do not use stdout = ... otherwise it hangs
 		else:
 			p = subprocess.Popen(command, shell=True) # do not use stdout = ... otherwise it hangs
 			# result = subprocess.call(command, shell=True)
 
-		# print 'subprocess', p
+		# print('subprocess', p)
 
 		waitingForPlugin = True
 		while waitingForPlugin:
-			# print 'waitingForPlugin'
+			# print('waitingForPlugin')
 			if os.path.isfile(signalingPath):
 				time.sleep(2)
 				with open(signalingPath, 'r') as f:
@@ -147,7 +148,7 @@ def runFijiScript(plugin):
 							os.killpg(os.getpgid(p.pid), signal.SIGTERM)
 						else: # what else ?
 							subprocess.call(['taskkill', '/F', '/T', '/PID', str(p.pid)])
-						print plugin , ' has run successfully: ', str(time.strftime('%Y%m%d-%H%M%S'))
+						print(plugin , ' has run successfully: ', str(time.strftime('%Y%m%d-%H%M%S')))
 						repeat = False
 					elif line == 'kill me and rerun me':
 						if platform.system() == 'Linux':
@@ -155,10 +156,10 @@ def runFijiScript(plugin):
 							os.killpg(os.getpgid(p.pid), signal.SIGTERM)
 						else: # what else ?
 							subprocess.call(['taskkill', '/F', '/T', '/PID', str(p.pid)])
-						print plugin , ' has run successfully and needs to be rerun ', str(time.strftime('%Y%m%d-%H%M%S'))
+						print(plugin , ' has run successfully and needs to be rerun ', str(time.strftime('%Y%m%d-%H%M%S')))
 					else:
-						print '********************* ERROR'
-				print 'signalingPath from MagC', signalingPath
+						print('********************* ERROR')
+				print('signalingPath from MagC', signalingPath)
 				os.remove(signalingPath)
 				waitingForPlugin = False
 			time.sleep(1)
@@ -195,27 +196,27 @@ pipeline = [
 
 ['assembly LM', 0],
 ['montage LM', 0],
-['alignRigid LM', 0],
-['export LMChannels', 0],
+# ['alignRigid LM', 0],
+# ['export LMChannels', 0],
 
 ### EM ###
 
-['init EM', 0],
-['downsample EM', 0],
-['assembly lowEM', 0],
-['assembly EM', 0],
-['montage ElasticEM', 1], # fails in java8
-['export stitchedEMForAlignment', 0],
-['reorder postElasticMontage', 0],
-['alignRigid EM', 0],
-['alignElastic EM', 0],
-['export alignedEMForRegistration', 0],
+# ['init EM', 0],
+# ['downsample EM', 0],
+# ['assembly lowEM', 0],
+# ['assembly EM', 0],
+# ['montage ElasticEM', 1], # fails in java8
+# ['export stitchedEMForAlignment', 0],
+# ['reorder postElasticMontage', 0],
+# ['alignRigid EM', 0],
+# ['alignElastic EM', 0],
+# ['export alignedEMForRegistration', 0],
 
 ### LM-EM registration###
 
-['compute RegistrationMovingLeastSquares', 1], #fiji8 fails to save MLS transforms
-['export TransformedCroppedLM', 0],
-['assembly LMProjects', 1], #java8 fails to apply coordinateTransforms
+# ['compute RegistrationMovingLeastSquares', 1], #fiji8 fails to save MLS transforms
+# ['export TransformedCroppedLM', 0],
+# ['assembly LMProjects', 1], #java8 fails to apply coordinateTransforms
 
 ]
 
