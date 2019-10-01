@@ -36,12 +36,18 @@ def whereIs(item, itemType, displayText, MagCScriptsFolder, isNew):
 			raise IOError
 		with open(storedItemPath , 'r') as f:
 			itemPath = f.readline()
+			itemPath = itemPath.replace('\n', '').replace(' ', '')
+			itemPath = os.path.join(itemPath)
 		if itemType == 'file' and not os.path.isfile(itemPath):
 			raise IOError
 	except IOError:
 		print('I do not know where ', item, ' is')
 		if itemType == 'file':
-			itemPath = askFile(displayText)
+			try:
+				itemPath = askFile(displayText)
+			except Exception as e:
+				print('Please create yourself the files whereIsFiji6.txt, whereIsFiji8.txt, whereIsMagCFolder.txt in the MagC folder. Each file contains the folder or fiji executable location in one line')
+				sys.exit()
 		elif itemType == 'folder':
 			itemPath = getDirectory(displayText)
 		with open(storedItemPath, 'w') as f:
@@ -194,8 +200,8 @@ pipeline = [
 
 ### LM ###
 
-['assembly LM', 0],
-['montage LM', 0],
+#['assembly LM', 0],
+#['montage LM', 0],
 # ['alignRigid LM', 0],
 # ['export LMChannels', 0],
 
