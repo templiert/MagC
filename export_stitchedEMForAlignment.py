@@ -4,7 +4,9 @@ import ij
 from ij import IJ, Macro
 import os, time
 
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 
 from mpicbg.trakem2.align import RegularizedAffineLayerAlignment
 

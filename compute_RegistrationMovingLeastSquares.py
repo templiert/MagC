@@ -4,7 +4,9 @@ from ij import ImagePlus
 from ij import WindowManager
 from ij.process import ByteProcessor
 import os, time, pickle, threading
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 from java.awt import Rectangle, Color
 from java.awt.geom import AffineTransform
 from java.util import HashSet, ArrayList

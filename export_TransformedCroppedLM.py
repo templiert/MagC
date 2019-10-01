@@ -30,7 +30,9 @@ from java.util import HashSet, ArrayList
 from java.awt.geom import AffineTransform
 from ini.trakem2 import Project, ControlWindow
 from ini.trakem2.display import Patch
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 
 from register_virtual_stack import Transform_Virtual_Stack_MT
 

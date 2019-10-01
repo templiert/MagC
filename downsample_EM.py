@@ -1,5 +1,7 @@
 from __future__ import with_statement
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 import os, time, shutil, pickle
 import ij
 from ij import IJ
@@ -26,7 +28,8 @@ def resizeAndSave(filePaths, l):
 			im = Opener().openImage(filePath)
 			IJ.log('Am I going to process the image: im.height = ' + str(im.height) + ' - tileHeight = ' + str(tileHeight) + ' tile number ' + str(k))
 			if im.height == tileHeight: # crop a few lines at the top only if it has not already been done (sometimes the pipeline gets rerun)
-				im = fc.crop(im,cropRoi)
+				if int(cropTiles) != 0:
+					im = fc.crop(im,cropRoi)
 				im = fc.normLocalContrast(im, normLocalContrastSize, normLocalContrastSize, 3, True, True)
 				# IJ.run(im, 'Replace value', 'pattern=0 replacement=1') # only for final waferOverview
 				FileSaver(im).saveAsTiff(filePath)
@@ -52,6 +55,8 @@ tileWidth = int(EMMetadata['tileWidth'])
 tileHeight = int(EMMetadata['tileHeight'])
 IJ.log('TileWidth ' + str(tileWidth))
 IJ.log('TileHeight ' + str(tileHeight))
+
+cropTiles = MagCParameters[namePlugin]['cropTiles'] # 1 for yes, 0 for no
 cropRoi = Roi(100, 20, tileWidth - 2*100, tileHeight-20) # remove first lines because the Zeiss API 
 
 # read downsampling factor

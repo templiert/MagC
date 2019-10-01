@@ -16,7 +16,9 @@ from ini.trakem2.display import Patch, Display
 from ini.trakem2.utils import Utils
 from mpicbg.trakem2.align import Align, AlignTask
 
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 
 namePlugin = 'assembly_EM'
 MagCFolder = fc.startPlugin(namePlugin)
