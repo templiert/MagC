@@ -5,7 +5,9 @@ from ij import IJ
 from ij import Macro
 import os, time
 # import subprocess
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 
 from mpicbg.trakem2.align import ElasticLayerAlignment
 from java.awt.geom import AffineTransform

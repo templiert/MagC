@@ -1,4 +1,4 @@
-#this script puts the acquired EM tiles into Trakem at the right positions
+#read metadata and initialize folders
 from __future__ import with_statement
 import os, re, errno, string, shutil, time
 import xml.etree.ElementTree as ET
@@ -18,7 +18,9 @@ from ini.trakem2.utils import Utils
 from ini.trakem2.display import Display, Patch
 from mpicbg.trakem2.align import Align, AlignTask
 
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 
 namePlugin = 'init_EM'
 MagCFolder = fc.startPlugin(namePlugin)

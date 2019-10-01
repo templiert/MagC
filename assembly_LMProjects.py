@@ -14,7 +14,9 @@ from ini.trakem2 import Project, ControlWindow
 from ini.trakem2.display import Patch
 from bunwarpj.bUnwarpJ_ import computeTransformationBatch, elasticTransformImageMacro
 from bunwarpj import MiscTools
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 
 from register_virtual_stack import Transform_Virtual_Stack_MT
 

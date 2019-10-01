@@ -57,6 +57,7 @@ scaleFactors = [0.1,1]
 ####################################
 ##### Plugin downsample_EM #####
 ####################################
+cropTiles = 0
 downsamplingFactor = 20
 nTilesAtATime = 400
 normLocalContrastSize = 500

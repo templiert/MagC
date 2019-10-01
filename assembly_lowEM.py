@@ -17,7 +17,9 @@ from ini.trakem2.utils import Utils
 from ini.trakem2.display import Display, Patch
 from mpicbg.trakem2.align import Align, AlignTask
 
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 
 from java.lang import Thread
 from java.util.concurrent.atomic import AtomicInteger

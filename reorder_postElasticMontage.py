@@ -2,7 +2,9 @@
 from __future__ import with_statement
 from ij import IJ
 import os, time, shutil
-import fijiCommon as fc
+import sys
+sys.path.append(IJ.getDirectory('plugins'))
+import fijiCommon as fc 
 from ini.trakem2 import Project, ControlWindow
 from ini.trakem2.display import Patch
 from distutils.dir_util import copy_tree
