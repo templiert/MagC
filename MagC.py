@@ -196,14 +196,14 @@ def findFilesFromTags(folder,tags):
 MagCFolder, fiji8Path, fiji6Path = init()
 
 pipeline = [
-['preprocess ForPipeline', 0],
+#['preprocess ForPipeline', 0],
 
 ### LM ###
 
 #['assembly LM', 0],
 #['montage LM', 0],
-# ['alignRigid LM', 0],
-# ['export LMChannels', 0],
+#['alignRigid LM', 0],
+['export LMChannels', 0],
 
 ### EM ###
 

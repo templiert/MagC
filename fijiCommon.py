@@ -685,8 +685,8 @@ def getAffFromRVSTransformPath(path):
 
 def saveLog(path):
 	logWindows = WindowManager.getWindow('Log')
-	textPanel = logWindows.getTextPanel()
-	if textPanel: #if no displays
+	if logWindows: #if no display
+		textPanel = logWindows.getTextPanel()
 		theLogText =  textPanel.getText().encode('utf-8')
 		with open(path,'a') as f:
 			f.write('The log has been saved at this time: ' + time.strftime('%Y%m%d-%H%M%S') + '\n')
