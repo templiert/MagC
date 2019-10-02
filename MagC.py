@@ -207,9 +207,9 @@ pipeline = [
 
 ### EM ###
 
-['init EM', 0],
-['downsample EM', 0],
-# ['assembly lowEM', 0],
+#['init EM', 0],
+#['downsample EM', 0],
+['assembly lowEM', 0],
 # ['assembly EM', 0],
 # ['montage ElasticEM', 1], # fails in java8
 # ['export stitchedEMForAlignment', 0],

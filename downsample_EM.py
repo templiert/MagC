@@ -3,7 +3,7 @@ import ij
 from ij import IJ
 import sys
 sys.path.append(IJ.getDirectory('plugins'))
-import fijiCommon as fc 
+import fijiCommon as fc
 import os, time, shutil, pickle
 from ij.io import Opener, FileSaver
 from java.lang import Thread, Runtime, Math
@@ -21,7 +21,7 @@ def sbemimagePathToName(p, snake=True):
     x,y = nToXY(imTile, numTilesX, snake = snake)
     newName = 'Tile_' + str(x).zfill(2) + '-' + str(y).zfill(2) + '.tif'
     return newName
-    
+
 def nToXY(n, nX, snake=True):
     x = Math.floor(n/float(nX))
     if snake:
@@ -32,7 +32,7 @@ def nToXY(n, nX, snake=True):
     else:
         y = n - x*nX
     return int(x), int(y)
-    
+
 def resizeAndSave(filePaths, l):
     while l.get() < min(len(filePaths), currentWrittenLayer + nTilesAtATime + 1) :
         k = l.getAndIncrement()
@@ -40,20 +40,18 @@ def resizeAndSave(filePaths, l):
 
             filePath = filePaths[k]
             imageName = os.path.basename(filePath)
-            
+
             if sbemimage:
                 nSection = int(os.path.basename(os.path.dirname(os.path.dirname(filePath))).split('g')[1])
-                imageFolderName = 'section_' + nSection
+                imageFolderName = 'section_' + str(nSection).zfill(4)
                 tileName = sbemimagePathToName(filePath)
                 resizedImageName = os.path.splitext(tileName)[0] + '_resized_' + factorString + os.path.splitext(tileName)[1]
             else:
                 imageFolderName = os.path.basename(os.path.dirname(filePath))
                 resizedImageName = os.path.splitext(imageName)[0] + '_resized_' + factorString + os.path.splitext(imageName)[1]
-            
-            resizedFilePath = fc.cleanLinuxPath(os.path.join(downSampledEMFolder, imageFolderName, resizedImageName))
 
+            resizedFilePath = fc.cleanLinuxPath(os.path.join(downSampledEMFolder, imageFolderName, resizedImageName))
             fc.mkdir_p(os.path.join(downSampledEMFolder, imageFolderName))
-            
             im = Opener().openImage(filePath)
             IJ.log('Am I going to process the image: im.height = ' + str(im.height) + ' - tileHeight = ' + str(tileHeight) + ' tile number ' + str(k))
             if im.height == tileHeight: # crop a few lines at the top only if it has not already been done (sometimes the pipeline gets rerun)
@@ -62,7 +60,7 @@ def resizeAndSave(filePaths, l):
                 im = fc.normLocalContrast(im, normLocalContrastSize, normLocalContrastSize, 3, True, True)
                 # IJ.run(im, 'Replace value', 'pattern=0 replacement=1') # only for final waferOverview
                 FileSaver(im).saveAsTiff(filePath)
-                
+
             if not os.path.isfile(resizedFilePath):
                 im = fc.resize(im, scaleFactor)
                 FileSaver(im).saveAsTiff(resizedFilePath)
@@ -106,6 +104,7 @@ if not os.path.isfile(filePathsPath):
             if filename.endswith('.tif'):
                 imPath = fc.cleanLinuxPath(os.path.join(dirpath, filename))
                 filePaths.append(imPath)
+    filePaths = fc.naturalSort(filePaths)
     with open(filePathsPath,'w') as f:
         for path in filePaths:
             f.write(path + '\n')
@@ -118,11 +117,12 @@ else:
             filePaths.append(line.replace('\n', ''))
     # filePaths = pickle.load(f)
 
+filePaths = fc.naturalSort(filePaths)
 if os.path.basename(os.path.dirname(os.path.normpath(filePaths[0]))) == 't0000':
     sbemimage = True
 else:
     sbemimage = False
-
+IJ.log('sbemimage flag: ' + str(sbemimage))
 #Create all the subfolders
 downSampledEMFolder = fc.mkdir_p(os.path.join(MagCEMFolder, 'MagC_EM_' + factorString, ''))
 # for sectionFolderName in os.walk(EMDataFolder).next()[1]:
