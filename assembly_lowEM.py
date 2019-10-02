@@ -33,7 +33,7 @@ def parallelStitch(atom, foldersToStitch, allPatchCoordinates):
 
 			tileConfigurationPath = os.path.join(sectionFolder, 'TileConfiguration_' + str(k).zfill(4) + '.registered.txt')
 
-			stitchCommand = 'type=[Filename defined position] order=[Defined by filename         ] grid_size_x=' + str(numTilesX) + ' grid_size_y=' + str(numTilesY) + ' tile_overlap=' + str(100 * (tileOverlapX + tileOverlapY)/2.) + ' first_file_index_x=0 first_file_index_y=0 directory=' + sectionFolder + ' file_names=Tile_{x}-{y}_resized_' + factorString + '.tif output_textfile_name=TileConfiguration_' + str(k).zfill(4) +'.txt fusion_method=[Do not fuse images (only write TileConfiguration)] regression_threshold=0.30 max/avg_displacement_threshold=2.50 absolute_displacement_threshold=3.50 compute_overlap subpixel_accuracy computation_parameters=[Save computation time (but use more RAM)] image_output=[Write to disk] output_directory=' + sectionFolder
+			stitchCommand = 'type=[Filename defined position] order=[Defined by filename         ] grid_size_x=' + str(numTilesX) + ' grid_size_y=' + str(numTilesY) + ' tile_overlap=' + str(100 * (tileOverlapX + tileOverlapY)/2.) + ' first_file_index_x=0 first_file_index_y=0 directory=' + sectionFolder + ' file_names=Tile_{xx}-{yy}_resized_' + factorString + '.tif output_textfile_name=TileConfiguration_' + str(k).zfill(4) +'.txt fusion_method=[Do not fuse images (only write TileConfiguration)] regression_threshold=0.30 max/avg_displacement_threshold=2.50 absolute_displacement_threshold=3.50 compute_overlap subpixel_accuracy computation_parameters=[Save computation time (but use more RAM)] image_output=[Write to disk] output_directory=' + sectionFolder
 			IJ.log(stitchCommand)
 			IJ.run('Grid/Collection stitching', stitchCommand)
 

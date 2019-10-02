@@ -6,39 +6,61 @@ import os, time, shutil, pickle
 import ij
 from ij import IJ
 from ij.io import Opener, FileSaver
-from java.lang import Thread, Runtime
+from java.lang import Thread, Runtime, Math
 from java.util.concurrent.atomic import AtomicInteger
 from ini.trakem2 import ControlWindow
 from ij.gui import Roi
 
+def sbemimagePathToName(p):
+    p = os.path.normpath(p)
+    imName = os.path.basename(p)
+    tileFolder = os.path.dirname(p)
+    imTile = int(os.path.basename(tileFolder).split('t')[1])
+    gridFolder = os.path.dirname(tileFolder)
+    imGrid = int(os.path.basename(gridFolder).split('g')[1])
+    x,y = nToXY(imTile, numTilesX, snake = True)
+    newName = 'Tile_' + str(x).zfill(2) + '-' + str(y).zfill(2) + '.tif'
+    return newName
+    
+def nToXY(n, nX, snake = True):
+    x = Math.floor(n/float(nX))
+    if snake:
+        if x%2 == 0:
+            y = n - x*nX
+        else:
+            y = nX - (n - x*nX) - 1
+    else:
+        y = n - x*nX
+    return int(x), int(y)
+    
 def resizeAndSave(filePaths, l):
-	while l.get() < min(len(filePaths), currentWrittenLayer + nTilesAtATime + 1) :
-		k = l.getAndIncrement()
-		if k < min(len(filePaths), currentWrittenLayer + nTilesAtATime):
+    while l.get() < min(len(filePaths), currentWrittenLayer + nTilesAtATime + 1) :
+        k = l.getAndIncrement()
+        if k < min(len(filePaths), currentWrittenLayer + nTilesAtATime):
 
-			filePath = filePaths[k]
-			
-			imageName = os.path.basename(filePath)
-			resizedImageName = os.path.splitext(imageName)[0] + '_resized_' + factorString + os.path.splitext(imageName)[1]
-			
-			imageFolderName = os.path.basename(os.path.dirname(filePath))
-			
-			resizedFilePath = fc.cleanLinuxPath(os.path.join(downSampledEMFolder, imageFolderName, resizedImageName))
-			
-			im = Opener().openImage(filePath)
-			IJ.log('Am I going to process the image: im.height = ' + str(im.height) + ' - tileHeight = ' + str(tileHeight) + ' tile number ' + str(k))
-			if im.height == tileHeight: # crop a few lines at the top only if it has not already been done (sometimes the pipeline gets rerun)
-				if int(cropTiles) != 0:
-					im = fc.crop(im,cropRoi)
-				im = fc.normLocalContrast(im, normLocalContrastSize, normLocalContrastSize, 3, True, True)
-				# IJ.run(im, 'Replace value', 'pattern=0 replacement=1') # only for final waferOverview
-				FileSaver(im).saveAsTiff(filePath)
-				
-			if not os.path.isfile(resizedFilePath):
-				im = fc.resize(im, scaleFactor)
-				FileSaver(im).saveAsTiff(resizedFilePath)
-				IJ.log('Image resized to ' + resizedFilePath)
-			im.close()
+            filePath = filePaths[k]
+            
+            imageName = os.path.basename(filePath)
+            resizedImageName = os.path.splitext(imageName)[0] + '_resized_' + factorString + os.path.splitext(imageName)[1]
+            
+            imageFolderName = os.path.basename(os.path.dirname(filePath))
+            
+            resizedFilePath = fc.cleanLinuxPath(os.path.join(downSampledEMFolder, imageFolderName, resizedImageName))
+            
+            im = Opener().openImage(filePath)
+            IJ.log('Am I going to process the image: im.height = ' + str(im.height) + ' - tileHeight = ' + str(tileHeight) + ' tile number ' + str(k))
+            if im.height == tileHeight: # crop a few lines at the top only if it has not already been done (sometimes the pipeline gets rerun)
+                if int(cropTiles) != 0:
+                    im = fc.crop(im,cropRoi)
+                im = fc.normLocalContrast(im, normLocalContrastSize, normLocalContrastSize, 3, True, True)
+                # IJ.run(im, 'Replace value', 'pattern=0 replacement=1') # only for final waferOverview
+                FileSaver(im).saveAsTiff(filePath)
+                
+            if not os.path.isfile(resizedFilePath):
+                im = fc.resize(im, scaleFactor)
+                FileSaver(im).saveAsTiff(resizedFilePath)
+                IJ.log('Image resized to ' + resizedFilePath)
+            im.close()
 
 namePlugin = 'downsample_EM'
 MagCFolder = fc.startPlugin(namePlugin)
@@ -53,6 +75,8 @@ EMMetadataPath = fc.findFilesFromTags(MagCFolder,['EM_Metadata'])[0]
 EMMetadata = fc.readParameters(EMMetadataPath)
 tileWidth = int(EMMetadata['tileWidth'])
 tileHeight = int(EMMetadata['tileHeight'])
+numTilesX = EMMetadata['numTilesX']
+numTilesY = EMMetadata['numTilesY']
 IJ.log('TileWidth ' + str(tileWidth))
 IJ.log('TileHeight ' + str(tileHeight))
 
@@ -69,29 +93,28 @@ nTilesAtATime = MagCParameters[namePlugin]['nTilesAtATime']
 
 # create or read the file with the paths to process
 if not os.path.isfile(filePathsPath):
-	filePaths = []
-	for (dirpath, dirnames, filenames) in os.walk(EMDataFolder):
-		for filename in filenames:
-			if filename.endswith('.tif'): 
-				imPath = fc.cleanLinuxPath(os.path.join(dirpath, filename))
-				filePaths.append(imPath)
-	with open(filePathsPath,'w') as f:
-		for path in filePaths:
-			f.write(path + '\n')
-	# pickle.dump(filePaths,f)
+    filePaths = []
+    for (dirpath, dirnames, filenames) in os.walk(EMDataFolder):
+        for filename in filenames:
+            if filename.endswith('.tif'): 
+                imPath = fc.cleanLinuxPath(os.path.join(dirpath, filename))
+                filePaths.append(imPath)
+    with open(filePathsPath,'w') as f:
+        for path in filePaths:
+            f.write(path + '\n')
+    # pickle.dump(filePaths,f)
 else:
-	filePaths = []
-	with open(filePathsPath,'r') as f:
-		lines = f.readlines()
-		for line in lines:
-			filePaths.append(line.replace('\n', ''))
-	# filePaths = pickle.load(f)
-
+    filePaths = []
+    with open(filePathsPath,'r') as f:
+        lines = f.readlines()
+        for line in lines:
+            filePaths.append(line.replace('\n', ''))
+    # filePaths = pickle.load(f)
 
 #Create all the subfolders
 downSampledEMFolder = fc.mkdir_p(os.path.join(MagCEMFolder, 'MagC_EM_' + factorString, ''))
 for sectionFolderName in os.walk(EMDataFolder).next()[1]:
-	fc.mkdir_p(os.path.join(downSampledEMFolder, sectionFolderName))
+    fc.mkdir_p(os.path.join(downSampledEMFolder, sectionFolderName))
 
 normLocalContrastSize = MagCParameters[namePlugin]['normLocalContrastSize']
 # downsample in parallel
@@ -102,6 +125,6 @@ IJ.log(namePlugin + ' layer ' + str(currentWrittenLayer))
 atomicI = AtomicInteger(currentWrittenLayer)
 fc.startThreads(resizeAndSave, fractionCores = 0.9, wait = 0, arguments = (filePaths, atomicI))
 
-# terminate or rerun if more tiles to be processed	
+# terminate or rerun if more tiles to be processed  
 time.sleep(1)
 fc.shouldRunAgain(namePlugin, atomicI.get(), len(filePaths), MagCFolder, '')
