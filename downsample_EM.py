@@ -1,28 +1,28 @@
 from __future__ import with_statement
+import ij
+from ij import IJ
 import sys
 sys.path.append(IJ.getDirectory('plugins'))
 import fijiCommon as fc 
 import os, time, shutil, pickle
-import ij
-from ij import IJ
 from ij.io import Opener, FileSaver
 from java.lang import Thread, Runtime, Math
 from java.util.concurrent.atomic import AtomicInteger
 from ini.trakem2 import ControlWindow
 from ij.gui import Roi
 
-def sbemimagePathToName(p):
+def sbemimagePathToName(p, snake=True):
     p = os.path.normpath(p)
     imName = os.path.basename(p)
     tileFolder = os.path.dirname(p)
     imTile = int(os.path.basename(tileFolder).split('t')[1])
     gridFolder = os.path.dirname(tileFolder)
     imGrid = int(os.path.basename(gridFolder).split('g')[1])
-    x,y = nToXY(imTile, numTilesX, snake = True)
+    x,y = nToXY(imTile, numTilesX, snake = snake)
     newName = 'Tile_' + str(x).zfill(2) + '-' + str(y).zfill(2) + '.tif'
     return newName
     
-def nToXY(n, nX, snake = True):
+def nToXY(n, nX, snake=True):
     x = Math.floor(n/float(nX))
     if snake:
         if x%2 == 0:
@@ -39,13 +39,20 @@ def resizeAndSave(filePaths, l):
         if k < min(len(filePaths), currentWrittenLayer + nTilesAtATime):
 
             filePath = filePaths[k]
-            
             imageName = os.path.basename(filePath)
-            resizedImageName = os.path.splitext(imageName)[0] + '_resized_' + factorString + os.path.splitext(imageName)[1]
             
-            imageFolderName = os.path.basename(os.path.dirname(filePath))
+            if sbemimage:
+                nSection = int(os.path.basename(os.path.dirname(os.path.dirname(filePath))).split('g')[1])
+                imageFolderName = 'section_' + nSection
+                tileName = sbemimagePathToName(filePath)
+                resizedImageName = os.path.splitext(tileName)[0] + '_resized_' + factorString + os.path.splitext(tileName)[1]
+            else:
+                imageFolderName = os.path.basename(os.path.dirname(filePath))
+                resizedImageName = os.path.splitext(imageName)[0] + '_resized_' + factorString + os.path.splitext(imageName)[1]
             
             resizedFilePath = fc.cleanLinuxPath(os.path.join(downSampledEMFolder, imageFolderName, resizedImageName))
+
+            fc.mkdir_p(os.path.join(downSampledEMFolder, imageFolderName))
             
             im = Opener().openImage(filePath)
             IJ.log('Am I going to process the image: im.height = ' + str(im.height) + ' - tileHeight = ' + str(tileHeight) + ' tile number ' + str(k))
@@ -96,7 +103,7 @@ if not os.path.isfile(filePathsPath):
     filePaths = []
     for (dirpath, dirnames, filenames) in os.walk(EMDataFolder):
         for filename in filenames:
-            if filename.endswith('.tif'): 
+            if filename.endswith('.tif'):
                 imPath = fc.cleanLinuxPath(os.path.join(dirpath, filename))
                 filePaths.append(imPath)
     with open(filePathsPath,'w') as f:
@@ -111,10 +118,15 @@ else:
             filePaths.append(line.replace('\n', ''))
     # filePaths = pickle.load(f)
 
+if os.path.basename(os.path.dirname(os.path.normpath(filePaths[0]))) == 't0000':
+    sbemimage = True
+else:
+    sbemimage = False
+
 #Create all the subfolders
 downSampledEMFolder = fc.mkdir_p(os.path.join(MagCEMFolder, 'MagC_EM_' + factorString, ''))
-for sectionFolderName in os.walk(EMDataFolder).next()[1]:
-    fc.mkdir_p(os.path.join(downSampledEMFolder, sectionFolderName))
+# for sectionFolderName in os.walk(EMDataFolder).next()[1]:
+    # fc.mkdir_p(os.path.join(downSampledEMFolder, sectionFolderName))
 
 normLocalContrastSize = MagCParameters[namePlugin]['normLocalContrastSize']
 # downsample in parallel

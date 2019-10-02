@@ -19,7 +19,8 @@ from ij.process import ImageStatistics as IS
 from ij.process import ImageConverter
 import ij.io.OpenDialog
 from ij.io import DirectoryChooser, FileSaver
-from ij.gui import GenericDialog, NonBlockingGenericDialog
+from ij.gui import GenericDialog
+#from ij.gui import NonBlockingGenericDialog #fails without display
 from ij.plugin.filter import GaussianBlur as Blur
 from ij.plugin.filter import Filters
 from ij.process import ByteProcessor, FloatProcessor
@@ -155,14 +156,14 @@ def findFoldersFromTags(folder,tags):
 	folderPaths = naturalSort(folderPaths)
 	return folderPaths
 
-def displayInfoDialog(text, title = 'Info'):
-	global infoDialog
-	infoDialog = NonBlockingGenericDialog(title)
-	infoDialog.addMessage(text)
-	infoDialog.setLocation(0,0)
-	infoDialog.setSize(400,800)
-	infoDialog.show()
-	return infoDialog
+#def displayInfoDialog(text, title = 'Info'):
+#	global infoDialog
+#	infoDialog = NonBlockingGenericDialog(title)
+#	infoDialog.addMessage(text)
+#	infoDialog.setLocation(0,0)
+#	infoDialog.setSize(400,800)
+#	infoDialog.show()
+#	return infoDialog
 
 def toString(*a):
 	return ''.join(map(str,a))
@@ -684,12 +685,13 @@ def getAffFromRVSTransformPath(path):
 
 def saveLog(path):
 	logWindows = WindowManager.getWindow('Log')
-	textPanel = logWindows.getTextPanel()
-	theLogText =  textPanel.getText().encode('utf-8')
-	with open(path,'a') as f:
-		f.write('The log has been saved at this time: ' + time.strftime('%Y%m%d-%H%M%S') + '\n')
-		f.write(theLogText)
-	logWindows.close()
+	if logWindows: #if no display
+		textPanel = logWindows.getTextPanel()
+		theLogText =  textPanel.getText().encode('utf-8')
+		with open(path,'a') as f:
+			f.write('The log has been saved at this time: ' + time.strftime('%Y%m%d-%H%M%S') + '\n')
+			f.write(theLogText)
+		logWindows.close()
 	return
 
 # def readSessionMetadata(folder):
