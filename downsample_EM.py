@@ -30,7 +30,7 @@ def nToXY(n, nX, snake=True):
         else:
             y = nX - (n - x*nX) - 1
     else:
-        y = n - x*nX
+        y = nX - (n - x*nX) - 1
     return int(x), int(y)
 
 def resizeAndSave(filePaths, l):
@@ -44,7 +44,7 @@ def resizeAndSave(filePaths, l):
             if sbemimage:
                 nSection = int(os.path.basename(os.path.dirname(os.path.dirname(filePath))).split('g')[1])
                 imageFolderName = 'section_' + str(nSection).zfill(4)
-                tileName = sbemimagePathToName(filePath)
+                tileName = sbemimagePathToName(filePath, snake=False)
                 resizedImageName = os.path.splitext(tileName)[0] + '_resized_' + factorString + os.path.splitext(tileName)[1]
             else:
                 imageFolderName = os.path.basename(os.path.dirname(filePath))
