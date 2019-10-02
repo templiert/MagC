@@ -20,6 +20,9 @@ import sys
 sys.path.append(IJ.getDirectory('plugins'))
 import fijiCommon as fc 
 
+def xyToN(x, y, nX):
+    return y * nX + (nX - x - 1)
+
 namePlugin = 'assembly_EM'
 MagCFolder = fc.startPlugin(namePlugin)
 MagCParameters = fc.readMagCParameters(MagCFolder)
@@ -27,11 +30,16 @@ MagCParameters = fc.readMagCParameters(MagCFolder)
 ControlWindow.setGUIEnabled(False)
 MagC_EM_Folder = os.path.join(MagCFolder, 'MagC_EM','')
 
+# read metadata
+EMMetadataPath = fc.findFilesFromTags(MagCFolder,['EM_Metadata'])[0]
+EMMetadata = fc.readParameters(EMMetadataPath)
+numTilesX = EMMetadata['numTilesX']
+
 # reading transforms from the low-resolution montage
 IJ.log('reading the affine transform parameters from the affine montage')
 transformsPath = os.path.join(MagC_EM_Folder, 'assembly_lowEM_Transforms.txt')
 with (open(transformsPath, 'r')) as f:
-	transforms = f.readlines()
+    transforms = f.readlines()
 nLayers = max([int(transforms[i]) for i in range(1, len(transforms),8) ]) + 1 # why not, could simply read the EM_Metadata parameters ...
 
 # getting downsamplingFactor
@@ -44,22 +52,37 @@ projectPath = fc.cleanLinuxPath(os.path.join(MagC_EM_Folder,'EMProject.xml'))
 project, loader, layerset, _ = fc.getProjectUtils(fc.initTrakem(fc.cleanLinuxPath(os.path.dirname(projectPath)), 1))
 project.saveAs(projectPath, True)
 
+if 'g0000' in os.listdir(os.path.join(MagCFolder, 'EMData')):
+    sbemimage = True
+else:
+    sbemimage = False
+    
 # Assembling all images in the project with the transforms computed on the low res and adjusted with the scale factor
 IJ.log('Assembling all images in the project with the transforms computed on the low res and adjusted with the scale factor')
 paths = []
 locations = []
 layers = []
 for i in range(0, len(transforms), 8):
-	alignedPatchPath = transforms[i]
-	alignedPatchName = os.path.basename(alignedPatchPath)
-	toAlignPatchName = alignedPatchName.replace('_' + factorString, '').replace('_resized', '')
-	toAlignPatchPath = os.path.join(MagCFolder, 'EMData', os.path.basename(os.path.dirname(alignedPatchPath)), toAlignPatchName)
-	toAlignPatchPath = fc.cleanLinuxPath(toAlignPatchPath[:-1])  # mysterious trailing character ...
-	IJ.log('toAlignPatchPath ' + toAlignPatchPath)
-	l = int(transforms[i+1])
-	paths.append(toAlignPatchPath)
-	locations.append([0,0])	
-	layers.append(l)
+    alignedPatchPath = os.path.normpath(transforms[i])
+    alignedPatchName = os.path.basename(alignedPatchPath)
+    if sbemimage:
+        x, y = alignedPatchName.split('Tile_')[1].split('_resized')[0].split('-')
+        x, y = int(x), int(y)
+        nSection = int(os.path.dirname(alignedPatchPath).split('section_')[1])
+        tileNumber = xyToN(x, y, numTilesX)
+        tileFolder = os.path.join(MagCFolder, 'EMData', 'g' + str(nSection).zfill(4), 't' + str(tileNumber).zfill(4))
+        tileName = os.listdir(tileFolder)[0]
+        toAlignPatchPath = os.path.join(tileFolder, tileName)
+    else:
+        toAlignPatchName = alignedPatchName.replace('_' + factorString, '').replace('_resized', '')
+        toAlignPatchPath = os.path.join(MagCFolder, 'EMData', os.path.basename(os.path.dirname(alignedPatchPath)), toAlignPatchName)
+        toAlignPatchPath = fc.cleanLinuxPath(toAlignPatchPath[:-1])  # mysterious trailing character ...
+    
+    IJ.log('toAlignPatchPath ' + toAlignPatchPath)
+    l = int(transforms[i+1])
+    paths.append(toAlignPatchPath)
+    locations.append([0,0]) 
+    layers.append(l)
 
 importFilePath = fc.createImportFile(MagC_EM_Folder, paths, locations, layers = layers, name = namePlugin)
 
@@ -70,21 +93,28 @@ task.join()
 
 # apply the transforms
 for i in range(0, len(transforms), 8):
-	alignedPatchPath = transforms[i]
-	alignedPatchName = os.path.basename(alignedPatchPath)
-	toAlignPatchName = alignedPatchName.replace('_' + factorString, '').replace('_resized', '')
-	toAlignPatchPath = os.path.join(MagCFolder, 'EMData', os.path.basename(os.path.dirname(alignedPatchPath)), toAlignPatchName)
-	toAlignPatchPath = toAlignPatchPath[:-1]  # why is there a trailing something !?
-	if toAlignPatchPath[:2] == os.sep + os.sep:
-		toAlignPatchPath = toAlignPatchPath[1:]
-	IJ.log('toAlignPatchPath ' + toAlignPatchPath)
-	l = int(transforms[i+1])
-	aff = AffineTransform([float(transforms[i+2]), float(transforms[i+3]), float(transforms[i+4]), float(transforms[i+5]), float(transforms[i+6])*float(downsamplingFactor), float(transforms[i+7])*float(downsamplingFactor) ])
-	layer = layerset.getLayers().get(l)
-	patches = layer.getDisplayables(Patch)
-	thePatch = filter(lambda x: os.path.normpath(loader.getAbsolutePath(x)) == os.path.normpath(toAlignPatchPath), patches)[0]
-	thePatch.setAffineTransform(aff)
-	thePatch.updateBucket()
+    alignedPatchPath = transforms[i]
+    alignedPatchName = os.path.basename(alignedPatchPath)
+    if sbemimage:
+        x, y = alignedPatchName.split('Tile_')[1].split('_resized')[0].split('-')
+        x, y = int(x), int(y)
+        nSection = int(os.path.dirname(alignedPatchPath).split('section_')[1])
+        tileNumber = xyToN(x, y, numTilesX)
+        tileFolder = os.path.join(MagCFolder, 'EMData', 'g' + str(nSection).zfill(4), 't' + str(tileNumber).zfill(4))
+        tileName = os.listdir(tileFolder)[0]
+        toAlignPatchPath = os.path.join(tileFolder, tileName)
+    else:
+        toAlignPatchName = alignedPatchName.replace('_' + factorString, '').replace('_resized', '')
+        toAlignPatchPath = os.path.join(MagCFolder, 'EMData', os.path.basename(os.path.dirname(alignedPatchPath)), toAlignPatchName)
+        toAlignPatchPath = fc.cleanLinuxPath(toAlignPatchPath[:-1])  # mysterious trailing character ...
+    IJ.log('--- toAlignPatchPath --- ' + toAlignPatchPath)
+    l = int(transforms[i+1])
+    aff = AffineTransform([float(transforms[i+2]), float(transforms[i+3]), float(transforms[i+4]), float(transforms[i+5]), float(transforms[i+6])*float(downsamplingFactor), float(transforms[i+7])*float(downsamplingFactor) ])
+    layer = layerset.getLayers().get(l)
+    patches = layer.getDisplayables(Patch)
+    thePatch = filter(lambda x: os.path.normpath(loader.getAbsolutePath(x)) == os.path.normpath(toAlignPatchPath), patches)[0]
+    thePatch.setAffineTransform(aff)
+    thePatch.updateBucket()
 
 time.sleep(2)
 fc.resizeDisplay(layerset)

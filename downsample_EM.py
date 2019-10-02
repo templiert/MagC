@@ -23,16 +23,16 @@ def sbemimagePathToName(p, snake=True):
     return newName
 
 def nToXY(n, nX, snake=True):
-    x = Math.floor(n/float(nX))
+    y = Math.floor(n/float(nX))
     if snake:
-        if x%2 == 0:
-            y = n - x*nX
+        if y%2 == 0:
+            x = n - y*nX
         else:
-            y = nX - (n - x*nX) - 1
+            x = nX - (n - y*nX) - 1
     else:
-        y = nX - (n - x*nX) - 1
+        x = nX - (n - y*nX) - 1
     return int(x), int(y)
-
+    
 def resizeAndSave(filePaths, l):
     while l.get() < min(len(filePaths), currentWrittenLayer + nTilesAtATime + 1) :
         k = l.getAndIncrement()
@@ -53,7 +53,7 @@ def resizeAndSave(filePaths, l):
             resizedFilePath = fc.cleanLinuxPath(os.path.join(downSampledEMFolder, imageFolderName, resizedImageName))
             fc.mkdir_p(os.path.join(downSampledEMFolder, imageFolderName))
             im = Opener().openImage(filePath)
-            IJ.log('Am I going to process the image: im.height = ' + str(im.height) + ' - tileHeight = ' + str(tileHeight) + ' tile number ' + str(k))
+            # IJ.log('Am I going to process the image: im.height = ' + str(im.height) + ' - tileHeight = ' + str(tileHeight) + ' tile number ' + str(k))
             if im.height == tileHeight: # crop a few lines at the top only if it has not already been done (sometimes the pipeline gets rerun)
                 if int(cropTiles) != 0:
                     im = fc.crop(im,cropRoi)
