@@ -1,10 +1,10 @@
 from __future__ import with_statement
+import ij
+from ij import IJ
 import sys
 sys.path.append(IJ.getDirectory('plugins'))
 import fijiCommon as fc 
 import os, time, shutil, pickle
-import ij
-from ij import IJ
 from ij.io import Opener, FileSaver
 from java.lang import Thread, Runtime
 from java.util.concurrent.atomic import AtomicInteger
@@ -21,8 +21,10 @@ def resizeAndSave(filePaths, l):
 			imageName = os.path.basename(filePath)
 			resizedImageName = os.path.splitext(imageName)[0] + '_resized_' + factorString + os.path.splitext(imageName)[1]
 			
-			imageFolderName = os.path.basename(os.path.dirname(filePath))
-			
+			if sbemimage:
+				imageFolderName = os.path.basename(os.path.dirname(filePath))
+			else:
+				imageFolderName = os.path.basename(os.path.dirname(os.path.dirname(filePath)))
 			resizedFilePath = fc.cleanLinuxPath(os.path.join(downSampledEMFolder, imageFolderName, resizedImageName))
 			
 			im = Opener().openImage(filePath)
@@ -86,6 +88,11 @@ else:
 		for line in lines:
 			filePaths.append(line.replace('\n', ''))
 	# filePaths = pickle.load(f)
+
+if os.path.basename(os.path.dirname(os.path.normpath(filePaths[0]))) == 't0000':
+	sbemimage = True
+else:
+	sbemimage = False
 
 
 #Create all the subfolders

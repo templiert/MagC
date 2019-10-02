@@ -203,12 +203,12 @@ pipeline = [
 #['assembly LM', 0],
 #['montage LM', 0],
 #['alignRigid LM', 0],
-['export LMChannels', 0],
+#['export LMChannels', 0],
 
 ### EM ###
 
-# ['init EM', 0],
-# ['downsample EM', 0],
+['init EM', 0],
+['downsample EM', 0],
 # ['assembly lowEM', 0],
 # ['assembly EM', 0],
 # ['montage ElasticEM', 1], # fails in java8
