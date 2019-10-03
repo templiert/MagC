@@ -17,6 +17,10 @@ from ini.trakem2.display import Patch
 from java.lang import Runtime, Thread 
 from java.util.concurrent.atomic import AtomicInteger
 
+import java
+from java.lang import System
+System.setProperty("javax.xml.parsers.SAXParserFactory", "com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl")
+
 def elasticMontage():
 	IJ.log('Thread called **************************')
 	while l.get() < min(nLayers, currentWrittenLayer + nLayersAtATime + 1) :
@@ -35,7 +39,10 @@ nLayersAtATime = MagCParams[namePlugin]['nLayersAtATime']
 nThreads = MagCParams[namePlugin]['nThreads']
 
 projectPath = fc.cleanLinuxPath(fc.findFilesFromTags(MagCFolder,['EM', 'Project'])[0])
+projectPath = os.sep + projectPath
 
+IJ.log('projectPath ----------' + str(projectPath))
+IJ.log('os.path.isfile(projectPath)------- ' + str(os.path.isfile(projectPath)))
 project, loader, layerset, nLayers = fc.openTrakemProject(projectPath)
 
 IJ.log('Sleeping in case the opening of the large project takes some time ...')

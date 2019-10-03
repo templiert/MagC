@@ -19,7 +19,7 @@ from ij.process import ImageStatistics as IS
 from ij.process import ImageConverter
 import ij.io.OpenDialog
 from ij.io import DirectoryChooser, FileSaver
-from ij.gui import GenericDialog
+#from ij.gui import GenericDialog
 #from ij.gui import NonBlockingGenericDialog #fails without display
 from ij.plugin.filter import GaussianBlur as Blur
 from ij.plugin.filter import Filters
@@ -769,15 +769,16 @@ def startPlugin(namePlugin): # the argument received is always a folder
 
 def terminatePlugin(namePlugin, MagCFolder, signalingMessage = 'kill me'):
 	signalingPath = os.path.join(MagCFolder, 'signalingFile_' + namePlugin + '.txt')
-	IJ.log('signalingPath ' + signalingPath)
+	signalingPath = cleanLinuxPath(signalingPath)
+        IJ.log('signalingPath ' + signalingPath)
 	logFolder = mkdir_p(os.path.join(MagCFolder, 'MagC_Logs'))
 	logPath = os.path.join(logFolder, 'log_' + namePlugin + '.txt')
 	IJ.log('Plugin ' + namePlugin + ' terminated at '  + str(time.strftime('%Y%m%d-%H%M%S')))
 	saveLog(logPath)
-	f = open(signalingPath, 'w')
-	f.write(signalingMessage)
-	f.close()
-	# IJ.run('Quit')
+	with open(signalingPath, 'w') as f:
+	    f.write(signalingMessage)
+	IJ.log('Written: ' + str(signalingPath))
+        # IJ.run('Quit')
 
 #ToDo: shouldRunAgain should receive the path of the counter file, so that it can delete the file when it is done
 def shouldRunAgain(namePlugin, l, nLayers, MagCFolder, project, increment = 1):

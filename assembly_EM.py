@@ -20,6 +20,10 @@ import sys
 sys.path.append(IJ.getDirectory('plugins'))
 import fijiCommon as fc 
 
+import java
+from java.lang import System
+System.setProperty('javax.xml.parsers.SAXParserFactory', 'com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl')
+
 def xyToN(x, y, nX):
     return y * nX + (nX - x - 1)
 
@@ -49,7 +53,8 @@ factorString = str(int(1000000*downsamplingFactor)).zfill(8)
 # create the normal resolution project
 IJ.log('Creating project with the full size EM images')
 projectPath = fc.cleanLinuxPath(os.path.join(MagC_EM_Folder,'EMProject.xml'))
-project, loader, layerset, _ = fc.getProjectUtils(fc.initTrakem(fc.cleanLinuxPath(os.path.dirname(projectPath)), 1))
+projectFolder = fc.cleanLinuxPath(os.path.dirname(projectPath))
+project, loader, layerset, _ = fc.getProjectUtils(fc.initTrakem(projectFolder, 1))
 project.saveAs(projectPath, True)
 
 if 'g0000' in os.listdir(os.path.join(MagCFolder, 'EMData')):
@@ -77,7 +82,9 @@ for i in range(0, len(transforms), 8):
         toAlignPatchName = alignedPatchName.replace('_' + factorString, '').replace('_resized', '')
         toAlignPatchPath = os.path.join(MagCFolder, 'EMData', os.path.basename(os.path.dirname(alignedPatchPath)), toAlignPatchName)
         toAlignPatchPath = fc.cleanLinuxPath(toAlignPatchPath[:-1])  # mysterious trailing character ...
-    
+
+    toAlignPatchPath = fc.cleanLinuxPath(toAlignPatchPath)
+
     IJ.log('toAlignPatchPath ' + toAlignPatchPath)
     l = int(transforms[i+1])
     paths.append(toAlignPatchPath)
@@ -107,12 +114,16 @@ for i in range(0, len(transforms), 8):
         toAlignPatchName = alignedPatchName.replace('_' + factorString, '').replace('_resized', '')
         toAlignPatchPath = os.path.join(MagCFolder, 'EMData', os.path.basename(os.path.dirname(alignedPatchPath)), toAlignPatchName)
         toAlignPatchPath = fc.cleanLinuxPath(toAlignPatchPath[:-1])  # mysterious trailing character ...
+
+    toAlignPatchPath = fc.cleanLinuxPath(os.path.normpath(toAlignPatchPath))
     IJ.log('--- toAlignPatchPath --- ' + toAlignPatchPath)
     l = int(transforms[i+1])
     aff = AffineTransform([float(transforms[i+2]), float(transforms[i+3]), float(transforms[i+4]), float(transforms[i+5]), float(transforms[i+6])*float(downsamplingFactor), float(transforms[i+7])*float(downsamplingFactor) ])
     layer = layerset.getLayers().get(l)
     patches = layer.getDisplayables(Patch)
-    thePatch = filter(lambda x: os.path.normpath(loader.getAbsolutePath(x)) == os.path.normpath(toAlignPatchPath), patches)[0]
+    patchPaths = [os.path.normpath(loader.getAbsolutePath(patch))for patch in patches]
+    IJ.log('ALL PATCH PATHS ------------ ' + str(patchPaths))
+    thePatch = filter(lambda x: os.path.normpath(loader.getAbsolutePath(x)) == toAlignPatchPath, patches)[0]
     thePatch.setAffineTransform(aff)
     thePatch.updateBucket()
 
@@ -121,4 +132,5 @@ fc.resizeDisplay(layerset)
 time.sleep(2)
 project.save()
 fc.closeProject(project)
+
 fc.terminatePlugin(namePlugin, MagCFolder)
