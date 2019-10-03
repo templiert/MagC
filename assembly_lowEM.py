@@ -83,6 +83,7 @@ downsampledFolder = os.path.join(MagC_EM_Folder, 'MagC_EM_' + factorString)
 IJ.log('downsampledFolder ' + downsampledFolder)
 
 foldersToStitch = [os.path.join(downsampledFolder, folderName) for folderName in os.walk(downsampledFolder).next()[1]]
+IJ.log('foldersToStitch -------------  ' + str(foldersToStitch))
 
 # stitching should be done in parallel but the stitching plugin does not seem to run in parallel, so fractionCores=0 -> only one core used ...
 atom = AtomicInteger(0)

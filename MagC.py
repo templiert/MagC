@@ -148,9 +148,11 @@ def runFijiScript(plugin):
 				time.sleep(2)
 				with open(signalingPath, 'r') as f:
 					line = f.readlines()[0]
+					print('line ------', line)
 					if line == 'kill me':
 						if platform.system() == 'Linux':
 							#p.terminate()
+							print('os.getpgid(p.pid)', os.getpgid(p.pid), p.pid)
 							os.killpg(os.getpgid(p.pid), signal.SIGTERM)
 						else: # what else ?
 							subprocess.call(['taskkill', '/F', '/T', '/PID', str(p.pid)])
@@ -159,6 +161,7 @@ def runFijiScript(plugin):
 					elif line == 'kill me and rerun me':
 						if platform.system() == 'Linux':
 							#p.terminate()
+							print('os.getpgid(p.pid)', os.getpgid(p.pid), p.pid)
 							os.killpg(os.getpgid(p.pid), signal.SIGTERM)
 						else: # what else ?
 							subprocess.call(['taskkill', '/F', '/T', '/PID', str(p.pid)])
@@ -207,10 +210,10 @@ pipeline = [
 
 ### EM ###
 
-['init EM', 0],
-['downsample EM', 0],
-['assembly lowEM', 0],
-['assembly EM', 0],
+#['init EM', 0],
+#['downsample EM', 0],
+#['assembly lowEM', 0],
+#['assembly EM', 0],
 ['montage ElasticEM', 1], # fails in java8
 # ['export stitchedEMForAlignment', 0],
 # ['reorder postElasticMontage', 0],

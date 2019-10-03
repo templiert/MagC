@@ -107,12 +107,15 @@ for i in range(0, len(transforms), 8):
         toAlignPatchName = alignedPatchName.replace('_' + factorString, '').replace('_resized', '')
         toAlignPatchPath = os.path.join(MagCFolder, 'EMData', os.path.basename(os.path.dirname(alignedPatchPath)), toAlignPatchName)
         toAlignPatchPath = fc.cleanLinuxPath(toAlignPatchPath[:-1])  # mysterious trailing character ...
+    toAlignPatchPath = fc.cleanLinuxPath(os.path.normpath(toAlignPatchPath))
     IJ.log('--- toAlignPatchPath --- ' + toAlignPatchPath)
     l = int(transforms[i+1])
     aff = AffineTransform([float(transforms[i+2]), float(transforms[i+3]), float(transforms[i+4]), float(transforms[i+5]), float(transforms[i+6])*float(downsamplingFactor), float(transforms[i+7])*float(downsamplingFactor) ])
     layer = layerset.getLayers().get(l)
     patches = layer.getDisplayables(Patch)
-    thePatch = filter(lambda x: os.path.normpath(loader.getAbsolutePath(x)) == os.path.normpath(toAlignPatchPath), patches)[0]
+    patchPaths = [os.path.normpath(loader.getAbsolutePath(patch))for patch in patches]
+    IJ.log('ALL PATCH PATHS ------------ ' + str(patchPaths))
+    thePatch = filter(lambda x: os.path.normpath(loader.getAbsolutePath(x)) == toAlignPatchPath, patches)[0]
     thePatch.setAffineTransform(aff)
     thePatch.updateBucket()
 
