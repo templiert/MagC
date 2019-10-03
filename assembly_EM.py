@@ -20,6 +20,10 @@ import sys
 sys.path.append(IJ.getDirectory('plugins'))
 import fijiCommon as fc 
 
+import java
+from java.lang import System
+System.setProperty('javax.xml.parsers.SAXParserFactory', 'com.sun.org.apache.xerces.internal.jaxp.SAXParserFactoryImpl')
+
 def xyToN(x, y, nX):
     return y * nX + (nX - x - 1)
 
@@ -49,7 +53,8 @@ factorString = str(int(1000000*downsamplingFactor)).zfill(8)
 # create the normal resolution project
 IJ.log('Creating project with the full size EM images')
 projectPath = fc.cleanLinuxPath(os.path.join(MagC_EM_Folder,'EMProject.xml'))
-project, loader, layerset, _ = fc.getProjectUtils(fc.initTrakem(fc.cleanLinuxPath(os.path.dirname(projectPath)), 1))
+projectFolder = fc.cleanLinuxPath(os.path.dirname(projectPath))
+project, loader, layerset, _ = fc.getProjectUtils(fc.initTrakem(projectFolder, 1))
 project.saveAs(projectPath, True)
 
 if 'g0000' in os.listdir(os.path.join(MagCFolder, 'EMData')):
@@ -77,7 +82,9 @@ for i in range(0, len(transforms), 8):
         toAlignPatchName = alignedPatchName.replace('_' + factorString, '').replace('_resized', '')
         toAlignPatchPath = os.path.join(MagCFolder, 'EMData', os.path.basename(os.path.dirname(alignedPatchPath)), toAlignPatchName)
         toAlignPatchPath = fc.cleanLinuxPath(toAlignPatchPath[:-1])  # mysterious trailing character ...
-    
+
+    toAlignPatchPath = fc.cleanLinuxPath(toAlignPatchPath)
+
     IJ.log('toAlignPatchPath ' + toAlignPatchPath)
     l = int(transforms[i+1])
     paths.append(toAlignPatchPath)
@@ -107,6 +114,7 @@ for i in range(0, len(transforms), 8):
         toAlignPatchName = alignedPatchName.replace('_' + factorString, '').replace('_resized', '')
         toAlignPatchPath = os.path.join(MagCFolder, 'EMData', os.path.basename(os.path.dirname(alignedPatchPath)), toAlignPatchName)
         toAlignPatchPath = fc.cleanLinuxPath(toAlignPatchPath[:-1])  # mysterious trailing character ...
+
     toAlignPatchPath = fc.cleanLinuxPath(os.path.normpath(toAlignPatchPath))
     IJ.log('--- toAlignPatchPath --- ' + toAlignPatchPath)
     l = int(transforms[i+1])
@@ -124,4 +132,5 @@ fc.resizeDisplay(layerset)
 time.sleep(2)
 project.save()
 fc.closeProject(project)
+
 fc.terminatePlugin(namePlugin, MagCFolder)

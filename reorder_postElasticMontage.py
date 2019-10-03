@@ -13,6 +13,7 @@ namePlugin = 'reorder_postElasticMontage'
 MagCFolder = fc.startPlugin(namePlugin)
 ControlWindow.setGUIEnabled(False)
 
+MagCParameters = fc.readMagCParameters(MagCFolder)
 # read the order. If there is no order file, use default order 0,1,2,...
 try: # look in priority for sectionOrder, which means that the solution from concorde has already been processed
 	orderPath = os.path.join(MagCFolder, filter(lambda x: 'sectionOrder' in x, os.listdir(MagCFolder))[0])
@@ -36,8 +37,8 @@ factorString = str(int(1000000*downsamplingFactor)).zfill(8)
 
 MagCEMFolder = os.path.dirname(fc.cleanLinuxPath(fc.findFilesFromTags(MagCFolder,['montage_ElasticEM_Transforms.txt'])[0]))
 
-projectPath = os.path.join(MagCEMFolder, 'EMProject_' + factorString + '.xml') # this is the low res EM project
-unorderedProjectPath = os.path.join(MagCEMFolder, 'LowEMProjectUnordered.xml')
+projectPath = fc.cleanLinuxPath(os.path.join(MagCEMFolder, 'EMProject_' + factorString + '.xml')) # this is the low res EM project
+unorderedProjectPath = fc.cleanLinuxPath(os.path.join(MagCEMFolder, 'LowEMProjectUnordered.xml'))
 
 # if a reordering had already been made, reinitialize the unordered project
 if os.path.isfile(unorderedProjectPath):
