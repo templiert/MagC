@@ -132,6 +132,8 @@ p[24] = ['visualize', False]
 
 p[26] = ['dampSpringMesh', 0.9] #/!\ attention, value copied from internet, not tested
 
+p[43] = ['useTps', False]
+
 params = ElasticLayerAlignment.Param( *[ a[1] for a in [p[i] for i in range(len(p))] ] )
 
 IJ.log('4. Opening the real scale EM project for elastic alignment')
