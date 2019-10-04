@@ -26,31 +26,31 @@ from java.util.concurrent.atomic import AtomicInteger
 from java.lang import Runtime
 
 def parallelStitch(atom, foldersToStitch, allPatchCoordinates):
-	while atom.get() < len(foldersToStitch):
-		k = atom.getAndIncrement()
-		if (k < len(foldersToStitch)):
-			sectionFolder = foldersToStitch[k]
+    while atom.get() < len(foldersToStitch):
+        k = atom.getAndIncrement()
+        if (k < len(foldersToStitch)):
+            sectionFolder = foldersToStitch[k]
 
-			tileConfigurationPath = os.path.join(sectionFolder, 'TileConfiguration_' + str(k).zfill(4) + '.registered.txt')
+            tileConfigurationPath = os.path.join(sectionFolder, 'TileConfiguration_' + str(k).zfill(4) + '.registered.txt')
 
-			stitchCommand = 'type=[Filename defined position] order=[Defined by filename         ] grid_size_x=' + str(numTilesX) + ' grid_size_y=' + str(numTilesY) + ' tile_overlap=' + str(100 * (tileOverlapX + tileOverlapY)/2.) + ' first_file_index_x=0 first_file_index_y=0 directory=' + sectionFolder + ' file_names=Tile_{xx}-{yy}_resized_' + factorString + '.tif output_textfile_name=TileConfiguration_' + str(k).zfill(4) +'.txt fusion_method=[Do not fuse images (only write TileConfiguration)] regression_threshold=0.70 max/avg_displacement_threshold=2.50 absolute_displacement_threshold=3.50 compute_overlap subpixel_accuracy computation_parameters=[Save computation time (but use more RAM)] image_output=[Write to disk] output_directory=' + sectionFolder
+            stitchCommand = 'type=[Filename defined position] order=[Defined by filename         ] grid_size_x=' + str(numTilesX) + ' grid_size_y=' + str(numTilesY) + ' tile_overlap=' + str(100 * (tileOverlapX + tileOverlapY)/2.) + ' first_file_index_x=0 first_file_index_y=0 directory=' + sectionFolder + ' file_names=Tile_{xx}-{yy}_resized_' + factorString + '.tif output_textfile_name=TileConfiguration_' + str(k).zfill(4) +'.txt fusion_method=[Do not fuse images (only write TileConfiguration)] regression_threshold=0.70 max/avg_displacement_threshold=2.50 absolute_displacement_threshold=3.50 compute_overlap subpixel_accuracy computation_parameters=[Save computation time (but use more RAM)] image_output=[Write to disk] output_directory=' + sectionFolder
 
-			# stitchCommand = 'type=[Filename defined position] order=[Defined by filename         ] grid_size_x=' + str(numTilesX) + ' grid_size_y=' + str(numTilesY) + ' tile_overlap=' + str(100 * (tileOverlapX + tileOverlapY)/2.) + ' first_file_index_x=0 first_file_index_y=0 directory=' + sectionFolder + ' file_names=Tile_{xx}-{yy}_resized_' + factorString + '.tif output_textfile_name=TileConfiguration_' + str(k).zfill(4) +'.txt fusion_method=[Do not fuse images (only write TileConfiguration)] regression_threshold=0.30 max/avg_displacement_threshold=2.50 absolute_displacement_threshold=3.50 subpixel_accuracy computation_parameters=[Save computation time (but use more RAM)] image_output=[Write to disk] output_directory=' + sectionFolder
-			IJ.log('stitchCommand ---- ' + stitchCommand)
-			IJ.run('Grid/Collection stitching', stitchCommand)
+            # stitchCommand = 'type=[Filename defined position] order=[Defined by filename         ] grid_size_x=' + str(numTilesX) + ' grid_size_y=' + str(numTilesY) + ' tile_overlap=' + str(100 * (tileOverlapX + tileOverlapY)/2.) + ' first_file_index_x=0 first_file_index_y=0 directory=' + sectionFolder + ' file_names=Tile_{xx}-{yy}_resized_' + factorString + '.tif output_textfile_name=TileConfiguration_' + str(k).zfill(4) +'.txt fusion_method=[Do not fuse images (only write TileConfiguration)] regression_threshold=0.30 max/avg_displacement_threshold=2.50 absolute_displacement_threshold=3.50 subpixel_accuracy computation_parameters=[Save computation time (but use more RAM)] image_output=[Write to disk] output_directory=' + sectionFolder
+            IJ.log('stitchCommand ---- ' + stitchCommand)
+            IJ.run('Grid/Collection stitching', stitchCommand)
 
-			f = open(tileConfigurationPath, 'r')
-			lines = f.readlines()[4:] # trimm the heading
-			f.close()
+            f = open(tileConfigurationPath, 'r')
+            lines = f.readlines()[4:] # trimm the heading
+            f.close()
 
-			for line in lines:
-				# paths
-				path = os.path.join(sectionFolder, line.replace('\n', '').split(';')[0])
-				#locations
-				x = float(line.replace('\n', '').split(';')[2].split(',')[0].split('(')[1])
-				y = float(line.replace('\n', '').split(';')[2].split(',')[1].split(')')[0])
-				
-				allPatchCoordinates.append([path, [x,y], k]) 
+            for line in lines:
+                # paths
+                path = os.path.join(sectionFolder, line.replace('\n', '').split(';')[0])
+                #locations
+                x = float(line.replace('\n', '').split(';')[2].split(',')[0].split('(')[1])
+                y = float(line.replace('\n', '').split(';')[2].split(',')[1].split(')')[0])
+                
+                allPatchCoordinates.append([path, [x,y], k]) 
 
 namePlugin = 'assembly_lowEM'
 MagCFolder = fc.startPlugin(namePlugin)
