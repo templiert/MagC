@@ -60,6 +60,8 @@ def resizeAndSave(filePaths, l):
                 im = fc.crop(im,cropRoi)
             im = fc.normLocalContrast(im, normLocalContrastSize, normLocalContrastSize, 3, True, True)
             # IJ.run(im, 'Replace value', 'pattern=0 replacement=1') # only for final waferOverview
+            IJ.save(im, filePath) # save the contrasted file
+            
             im = fc.resize(im, scaleFactor)
             #FileSaver(im).saveAsTiff(filePath)
             IJ.save(im, resizedFilePath)
