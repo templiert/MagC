@@ -145,7 +145,7 @@ def runFijiScript(plugin):
         while waitingForPlugin:
             # print('waitingForPlugin')
             if os.path.isfile(signalingPath):
-                time.sleep(2)
+                #time.sleep(2)
                 with open(signalingPath, 'r') as f:
                     line = f.readlines()[0]
                     print('line ------', line)
@@ -170,6 +170,7 @@ def runFijiScript(plugin):
                         print('********************* ERROR')
                 print('signalingPath from MagC', signalingPath)
                 os.remove(signalingPath)
+                time.sleep(2)
                 waitingForPlugin = False
             time.sleep(1)
 
