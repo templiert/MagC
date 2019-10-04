@@ -145,14 +145,14 @@ def runFijiScript(plugin):
         while waitingForPlugin:
             # print('waitingForPlugin')
             if os.path.isfile(signalingPath):
-                time.sleep(2)
+                #time.sleep(2)
                 with open(signalingPath, 'r') as f:
                     line = f.readlines()[0]
-					print('line ------', line)
+                    print('line ------', line)
                     if line == 'kill me':
                         if platform.system() == 'Linux':
                             #p.terminate()
-							print('os.getpgid(p.pid)', os.getpgid(p.pid), p.pid)
+                            print('os.getpgid(p.pid)', os.getpgid(p.pid), p.pid)
                             os.killpg(os.getpgid(p.pid), signal.SIGTERM)
                         else: # what else ?
                             subprocess.call(['taskkill', '/F', '/T', '/PID', str(p.pid)])
@@ -161,7 +161,7 @@ def runFijiScript(plugin):
                     elif line == 'kill me and rerun me':
                         if platform.system() == 'Linux':
                             #p.terminate()
-							print('os.getpgid(p.pid)', os.getpgid(p.pid), p.pid)
+                            print('os.getpgid(p.pid)', os.getpgid(p.pid), p.pid)
                             os.killpg(os.getpgid(p.pid), signal.SIGTERM)
                         else: # what else ?
                             subprocess.call(['taskkill', '/F', '/T', '/PID', str(p.pid)])
@@ -170,6 +170,7 @@ def runFijiScript(plugin):
                         print('********************* ERROR')
                 print('signalingPath from MagC', signalingPath)
                 os.remove(signalingPath)
+                time.sleep(2)
                 waitingForPlugin = False
             time.sleep(1)
 
@@ -210,13 +211,13 @@ pipeline = [
 
 ### EM ###
 
-#['init EM', 0],
-#['downsample EM', 0],
-#['assembly lowEM', 0],
-#['assembly EM', 0],
-#['montage ElasticEM', 1], # fails in java8
-#['export stitchedEMForAlignment', 0],
-#['reorder postElasticMontage', 0],
+['init EM', 0],
+['downsample EM', 0],
+['assembly lowEM', 0],
+['assembly EM', 0],
+['montage ElasticEM', 1], # fails in java8
+['export stitchedEMForAlignment', 0],
+['reorder postElasticMontage', 0],
 ['alignRigid EM', 0],
 # ['alignElastic EM', 0],
 # ['export alignedEMForRegistration', 0],

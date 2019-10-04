@@ -793,7 +793,7 @@ def shouldRunAgain(namePlugin, l, nLayers, MagCFolder, project, increment = 1):
 		terminatePlugin(namePlugin, MagCFolder, signalingMessage = 'kill me and rerun me')
 		# sys.exit(2)
 	else:
-		IJ.log(namePlugin + ' done.')
+		IJ.log(namePlugin + ' done. ' + str(namePlugin ) + ' -- ' +  str(l) + ' -- ' + str(nLayers) + ' -- ' + str(increment))
 		saveLog(logPath)
 		time.sleep(2)
 		closeProject(project)

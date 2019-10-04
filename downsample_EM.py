@@ -53,18 +53,17 @@ def resizeAndSave(filePaths, l):
             resizedFilePath = fc.cleanLinuxPath(os.path.join(downSampledEMFolder, imageFolderName, resizedImageName))
             fc.mkdir_p(os.path.join(downSampledEMFolder, imageFolderName))
             im = Opener().openImage(filePath)
+            im = IJ.openImage(filePath)
             # IJ.log('Am I going to process the image: im.height = ' + str(im.height) + ' - tileHeight = ' + str(tileHeight) + ' tile number ' + str(k))
-            if im.height == tileHeight: # crop a few lines at the top only if it has not already been done (sometimes the pipeline gets rerun)
-                if int(cropTiles) != 0:
-                    im = fc.crop(im,cropRoi)
-                im = fc.normLocalContrast(im, normLocalContrastSize, normLocalContrastSize, 3, True, True)
-                # IJ.run(im, 'Replace value', 'pattern=0 replacement=1') # only for final waferOverview
-                FileSaver(im).saveAsTiff(filePath)
-
-            if not os.path.isfile(resizedFilePath):
-                im = fc.resize(im, scaleFactor)
-                FileSaver(im).saveAsTiff(resizedFilePath)
-                IJ.log('Image resized to ' + resizedFilePath)
+            # crop a few lines at the top only if it has not already been done (sometimes the pipeline gets rerun)
+            if int(cropTiles) != 0 and im.height == tileHeight:
+                im = fc.crop(im,cropRoi)
+            im = fc.normLocalContrast(im, normLocalContrastSize, normLocalContrastSize, 3, True, True)
+            # IJ.run(im, 'Replace value', 'pattern=0 replacement=1') # only for final waferOverview
+            im = fc.resize(im, scaleFactor)
+            #FileSaver(im).saveAsTiff(filePath)
+            IJ.save(im, resizedFilePath)
+            IJ.log('Image resized to ' + resizedFilePath)
             im.close()
 
 namePlugin = 'downsample_EM'
