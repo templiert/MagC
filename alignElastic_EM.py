@@ -3,11 +3,11 @@ from __future__ import with_statement
 import ij
 from ij import IJ
 from ij import Macro
-import os, time
+import os, time, shutil
 # import subprocess
 import sys
 sys.path.append(IJ.getDirectory('plugins'))
-import fijiCommon as fc 
+import fijiCommon as fc
 
 from mpicbg.trakem2.align import ElasticLayerAlignment
 from java.awt.geom import AffineTransform
@@ -140,11 +140,18 @@ IJ.log('4. Opening the real scale EM project for elastic alignment')
 project, loader, layerset, nLayers = fc.openTrakemProject(projectPath)
 
 IJ.log('4. Starting alignment')
-IJ.log('The layer range is: ' + str(currentLayer) + '-' +  str(min(currentLayer + nLayersAtATime - 1, nLayers -1)) )
-IJ.log('The fixed layers are: ' + str(0) + '-' + str(currentLayer - layerOverlap + 1))
 
-layerRange = layerset.getLayers(currentLayer, min(currentLayer + nLayersAtATime - 1, nLayers -1)) # nLayers -1 because starts at 0
-fixedLayers = HashSet(layerset.getLayers(0, currentLayer - layerOverlap + 1))
+layerRangeMin = currentLayer
+layerRangeMax = min(currentLayer + nLayersAtATime - 1, nLayers -1)
+
+fixedLayersMin = 0
+fixedLayersMax = layerRangeMin
+
+IJ.log('The layer range is: ' + str(layerRangeMin) + '-' +  str(layerRangeMax))
+IJ.log('The fixed layers are: ' + str(fixedLayersMin) + '-' + str(fixedLayersMax))
+
+layerRange = layerset.getLayers(layerRangeMin, layerRangeMax) # nLayers -1 because starts at 0
+fixedLayers = HashSet(layerset.getLayers(fixedLayersMin, fixedLayersMax))
 emptyLayers = HashSet()
 propagateTransformBefore = False
 propagateTransformAfter = False

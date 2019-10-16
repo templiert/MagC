@@ -865,7 +865,7 @@ def startThreads(function, fractionCores = 1, wait = 0, arguments = None, nThrea
 		if arguments == None:
 			thread = threading.Thread(target = function)
 		else:
-			IJ.log('These are the arguments ' + str(arguments) + 'III type ' + str(type(arguments)))
+			#IJ.log('These are the arguments ' + str(arguments) + 'III type ' + str(type(arguments)))
 			thread = threading.Thread(group = None, target = function, args = arguments)
 		threads.append(thread)
 		thread.start()
