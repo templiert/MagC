@@ -23,13 +23,14 @@ ControlWindow.setGUIEnabled(False)
 MagC_EM_Folder = os.path.join(MagCFolder, 'MagC_EM','')
 MagCParameters = fc.readMagCParameters(MagCFolder)
 
+regModel = MagCParameters[namePlugin]['regModel']
 inputFolder = fc.findFoldersFromTags(MagCFolder, ['export_stitchedEMForAlignment'])[0]
 imagePaths = filter(lambda x: os.path.splitext(x)[1] == '.tif', fc.naturalSort([os.path.join(inputFolder, x) for x in os.listdir(inputFolder)]))
 
 regParams = Register_Virtual_Stack_MT.Param()
 regParams.minInlierRatio = 0
-regParams.registrationModelIndex = 3 # 1-Rigid, 2-Similarity, 3-Affine
-regParams.featuresModelIndex = 3
+regParams.registrationModelIndex = regModel # 1-Rigid, 2-Similarity, 3-Affine
+regParams.featuresModelIndex = regModel
 
 exportForRigidAlignmentFolder = inputFolder
 resultRigidAlignmentFolder = fc.mkdir_p(os.path.join(MagC_EM_Folder, 'resultRigidAlignment'))
@@ -42,13 +43,19 @@ use_shrinking_constraint = 0
 
 if len(os.listdir(resultRigidAlignmentFolder)) != 2 * len(os.listdir(inputFolder)):
     IJ.log('Rigid alignment with register virtual stack')
-    Register_Virtual_Stack_MT.exec(exportForRigidAlignmentFolder, resultRigidAlignmentFolder, resultRigidAlignmentFolder, referenceName, regParams, use_shrinking_constraint)
+    Register_Virtual_Stack_MT.exec(exportForRigidAlignmentFolder, 
+				resultRigidAlignmentFolder, 
+				resultRigidAlignmentFolder, 
+				referenceName, 
+				regParams, 
+				use_shrinking_constraint)
     time.sleep(2)
     # IJ.getImage().close()
     WindowManager.closeAllWindows()
     IJ.log('Rigid Alignment done')
 else:
     IJ.log('Rigid alignment already performed - skipping')
+
 ################################################
 
 ###########################################
@@ -69,7 +76,7 @@ for l, layer in enumerate(layerset.getLayers()):
 fc.resizeDisplay(layerset)
 project.save()
 fc.closeProject(project)
-IJ.log('All LM layers have been aligned in: ' + projectPath)
+IJ.log('All EM layers have been aligned in: ' + projectPath)
 
 time.sleep(1)
 
