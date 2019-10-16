@@ -277,13 +277,20 @@ def writeAllAffineTransforms(project,path):
 	IJ.log('All affine Transforms saved in: ' + path)
 	return
 
-def pushTransformsToTopLeft(path):
+def pushTransformsToTopLeft(path, patchesPerSection):
     with open(path, 'r') as f:
         lines = f.readlines()
-    minX = min([float(lines[k].replace('\n',''))
-            for k in range(6, len(lines), 8)])
-    minY = min([float(lines[k].replace('\n',''))
-            for k in range(7, len(lines), 8)])
+    # minX = min([float(lines[k].replace('\n',''))
+            # for k in range(6, len(lines), 8)])
+    # minY = min([float(lines[k].replace('\n',''))
+            # for k in range(7, len(lines), 8)])
+
+    minX = [min([float(lines[p].replace('\n',''))
+            for p in range(6 + 8*s*patchesPerSection, 6 + 8*s*patchesPerSection + 8*patchesPerSection + 1, 8)])
+            for s in range(len(lines)/8/patchesPerSection]
+    minY = [min([float(lines[p].replace('\n',''))
+            for p in range(7 + 8*s*patchesPerSection, 7 + 8*s*patchesPerSection + 8*patchesPerSection + 1, 8)])
+            for s in range(len(lines)/8/patchesPerSection]
 
     with open(path, 'w') as f:
         for l, line in enumerate(lines):

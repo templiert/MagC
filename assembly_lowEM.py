@@ -143,7 +143,7 @@ time.sleep(2)
 transformsPath = os.path.join(MagC_EM_Folder,
                 namePlugin + '_Transforms.txt')
 fc.writeAllAffineTransforms(project, transformsPath)
-fc.pushTransformsToTopLeft(transformsPath)
+fc.pushTransformsToTopLeft(transformsPath, numTilesX * numTilesY)
 fc.closeProject(project)
 
 IJ.log('Assembling the low EM project done and saved into ' + projectPath)
