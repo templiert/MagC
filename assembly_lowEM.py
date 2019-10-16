@@ -139,19 +139,12 @@ fc.resizeDisplay(layerset)
 time.sleep(2)
 project.save()
 time.sleep(2)
-fc.closeProject(project)
-
-###
-
-project, loader, layerset, nLayers = fc.openTrakemProject(projectPath)
-fc.resizeDisplay(layerset)
-time.sleep(2)
 # save all transforms into one file
-transformsPath = os.path.join(MagC_EM_Folder , namePlugin + '_Transforms.txt')
+transformsPath = os.path.join(MagC_EM_Folder,
+                namePlugin + '_Transforms.txt')
 fc.writeAllAffineTransforms(project, transformsPath)
-
+fc.pushTransformsToTopLeft(transformsPath)
 fc.closeProject(project)
-###
 
 IJ.log('Assembling the low EM project done and saved into ' + projectPath)
 fc.terminatePlugin(namePlugin, MagCFolder)

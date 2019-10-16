@@ -277,6 +277,27 @@ def writeAllAffineTransforms(project,path):
 	IJ.log('All affine Transforms saved in: ' + path)
 	return
 
+def pushTransformsToTopLeft(path):
+    with open(path, 'r') as f:
+        lines = f.readlines()
+    minX = min([float(lines[k].replace('\n',''))
+            for k in range(6, len(lines), 8)])
+    minY = min([float(lines[k].replace('\n',''))
+            for k in range(7, len(lines), 8)])
+
+    with open(path, 'w') as f:
+        for l, line in enumerate(lines):
+            if l%8 == 6:
+                newLine = float(line.replace('\n','')) - minX
+                f.write(str(newLine) + '\n')
+            elif l%8 == 7:
+                newLine = float(line.replace('\n','')) - minY
+                f.write(str(newLine) + '\n')
+            else:
+				f.write(str(line))
+
+    
+    
 def readTransform(path):
 	IJ.log('Reading transformation file: ' + path)
 	trans = []
