@@ -297,6 +297,19 @@ def pushTransformsToTopLeft(path, patchesPerSection):
             else:
                 f.write(str(line))
 
+def customResizeDisplayLayerWise(project):
+    p, loader, layerset, nLayers = getProjectUtils(project)
+    for l, layer in enumerate(layerset.getLayers()):
+        patches = layer.getDisplayables(Patch)
+        minX = min([patch.getX() for patch in patches])
+        minY = min([patch.getY() for patch in patches])
+        if (minX != 0) or (minY != 0):
+            for patch in patches:
+                patch.setLocation(
+                    patch.getX() - minX,
+                    patch.getY() - minY)
+                patch.updateBucket()
+        
 def readTransform(path):
 	IJ.log('Reading transformation file: ' + path)
 	trans = []

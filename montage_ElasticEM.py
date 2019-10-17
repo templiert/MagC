@@ -95,8 +95,9 @@ for p in range(nThreads):
 for thread in threads:
 	thread.join()
 
-
 IJ.log( namePlugin + ' layer ' + str(currentWrittenLayer))
+fc.resizeDisplay(layerset)
+fc.customResizeDisplayLayerWise(project)
 fc.resizeDisplay(layerset)
 project.save()
 

@@ -217,9 +217,9 @@ pipeline = [
 ['assembly EM', 0],
 ['montage ElasticEM', 1], # fails in java8
 ['export stitchedEMForAlignment', 0],
-['reorder postElasticMontage', 0],
-['alignRigid EM', 0],
-['alignElastic EM', 0],
+#['reorder postElasticMontage', 0],
+#['alignRigid EM', 0],
+#['alignElastic EM', 0],
 #['export alignedEMForRegistration', 0],
 
 ### LM-EM registration###
