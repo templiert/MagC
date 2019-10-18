@@ -1,25 +1,25 @@
 from __future__ import with_statement
 # MLSTWithoutAffine
-	# wrong, unscaled, contractViolated bug
+    # wrong, unscaled, contractViolated bug
 # StandardMLST
-	# now completely fails on the first 20 slices ... a bit surprising ...
+    # now completely fails on the first 20 slices ... a bit surprising ...
 # MLSTAffine
-	# ok
+    # ok
 # AffineFromMLSTXMLRead
-	# is simply identity
+    # is simply identity
 
 # how to exclude non-matching registration ?
-	# size of the transformed LM
-		# would sometimes fail 
-	# compute correlation of the cropped registered pair
-		# does not work
-		# I also do not know trivially where to crop
-	# rerun a SIFT in parallel and get the displacement
-	# check the amount of shear in the computed transform
+    # size of the transformed LM
+        # would sometimes fail 
+    # compute correlation of the cropped registered pair
+        # does not work
+        # I also do not know trivially where to crop
+    # rerun a SIFT in parallel and get the displacement
+    # check the amount of shear in the computed transform
 
-	
+    
 from mpicbg.imglib.algorithm.correlation import CrossCorrelation
-from mpicbg.imglib.image import ImagePlusAdapter	
+from mpicbg.imglib.image import ImagePlusAdapter    
 
 from ij import IJ, Macro, ImagePlus
 from ij.process import ByteProcessor
@@ -67,33 +67,33 @@ layerZ = layersetZ.getLayers().get(0)
 
 # create the folders
 for channel in channels:
-	affineCroppedFolder = fc.mkdir_p(os.path.join(LMFolder, 'affineCropped_' + channel))
+    affineCroppedFolder = fc.mkdir_p(os.path.join(LMFolder, 'affineCropped_' + channel))
 
 for l in range(nLayers):
-	layerFolder = os.path.join(registrationFolder, 'layer_' + str(l).zfill(4))
-	registeredFolder = os.path.join(layerFolder, 'registered')
-	affTransformPath = os.path.join(registeredFolder, 'affineSerialized')
-	if os.path.isfile(affTransformPath):
-		affTransform = loaderZ.deserialize(affTransformPath)
-		
-		for channel in channels:
-			affineCroppedFolder = os.path.join(LMFolder, 'affineCropped_' + channel)
+    layerFolder = os.path.join(registrationFolder, 'layer_' + str(l).zfill(4))
+    registeredFolder = os.path.join(layerFolder, 'registered')
+    affTransformPath = os.path.join(registeredFolder, 'affineSerialized')
+    if os.path.isfile(affTransformPath):
+        affTransform = loaderZ.deserialize(affTransformPath)
+        
+        for channel in channels:
+            affineCroppedFolder = os.path.join(LMFolder, 'affineCropped_' + channel)
 
-			LMMosaicsPath = fc.cleanLinuxPath(
+            LMMosaicsPath = fc.cleanLinuxPath(
                 os.path.join(
                     LMFolder,
                     'exported_downscaled_1_' + channel,
                     'exported_downscaled_1_' + channel 
                     + '_' + str(l).zfill(4) + '.tif'))
-			
-			patch = Patch.createPatch(pZ, LMMosaicsPath)
-			layerZ.add(patch)
-			IJ.log('Setting the affineTransform ' + str(affTransform))
-			patch.setAffineTransform(affTransform)
-			patch.updateBucket()
+            
+            patch = Patch.createPatch(pZ, LMMosaicsPath)
+            layerZ.add(patch)
+            IJ.log('Setting the affineTransform ' + str(affTransform))
+            patch.setAffineTransform(affTransform)
+            patch.updateBucket()
 
-			bb = Rectangle(0, 0, widthEM, heightEM)
-			affineCroppedIm = loaderZ.getFlatImage(
+            bb = Rectangle(0, 0, widthEM, heightEM)
+            affineCroppedIm = loaderZ.getFlatImage(
                 layerZ,
                 bb,
                 1,
@@ -104,7 +104,7 @@ for l in range(nLayers):
                 True,
                 Color.black,
                 None)
-			affineCroppedIm = fc.normLocalContrast(
+            affineCroppedIm = fc.normLocalContrast(
                 affineCroppedIm,
                 50,
                 50,
@@ -116,40 +116,40 @@ for l in range(nLayers):
                 affineCroppedFolder,
                 'affineCropped_' + channel 
                 + '_' + str(l).zfill(4) + '.tif')
-			IJ.save(affineCroppedIm, affineCroppedImPath)
-			affineCroppedIm.close()
+            IJ.save(affineCroppedIm, affineCroppedImPath)
+            affineCroppedIm.close()
 
-			layerZ.remove(patch)
-			layerZ.recreateBuckets()
-			IJ.log('Has been written: ' + str(affineCroppedImPath))
+            layerZ.remove(patch)
+            layerZ.recreateBuckets()
+            IJ.log('Has been written: ' + str(affineCroppedImPath))
 fc.closeProject(pZ) # close dummy trakem
 
 # # # # # # create the median folders
 # # # # # for channel in channels[:-2]: # the fluorescent channels, excluding the brightfield and contrastedBrightfield channels 
-	# # # # # affineCroppedFolder = os.path.join(LMFolder, 'affineCropped_' + channel)
-	# # # # # finalLMFolder = fc.mkdir_p(os.path.join(LMFolder, 'finalLM_' + channel))
-	# # # # # imPaths = [os.path.join(affineCroppedFolder, imName) for imName in fc.naturalSort(os.listdir(affineCroppedFolder))]
-	# # # # # imStack = fc.stackFromPaths(imPaths)
-	# # # # # IJ.run(imStack, 'Median 3D...', 'x=2 y=2 z=2')
-	# # # # # stack = imStack.getImageStack()
-	
-	# # # # # for imId, imPath in enumerate(imPaths):
-		# # # # # layerId = int(os.path.splitext((os.path.basename(imPath)))[0].split('_')[-1])
-		
-		# # # # # tileIndex = imStack.getStackIndex(0, 0, imId + 1) # to access the slice in the stack
-		# # # # # finalIm = ImagePlus('finalLM_' + channel + '_' + str(layerId).zfill(4), stack.getProcessor(tileIndex).convertToByteProcessor())
-		# # # # # finalImPath = os.path.join(finalLMFolder, 'finalLM_' + channel + '_' + str(layerId).zfill(4) + '.tif')
-		# # # # # IJ.save(finalIm, finalImPath)
+    # # # # # affineCroppedFolder = os.path.join(LMFolder, 'affineCropped_' + channel)
+    # # # # # finalLMFolder = fc.mkdir_p(os.path.join(LMFolder, 'finalLM_' + channel))
+    # # # # # imPaths = [os.path.join(affineCroppedFolder, imName) for imName in fc.naturalSort(os.listdir(affineCroppedFolder))]
+    # # # # # imStack = fc.stackFromPaths(imPaths)
+    # # # # # IJ.run(imStack, 'Median 3D...', 'x=2 y=2 z=2')
+    # # # # # stack = imStack.getImageStack()
+    
+    # # # # # for imId, imPath in enumerate(imPaths):
+        # # # # # layerId = int(os.path.splitext((os.path.basename(imPath)))[0].split('_')[-1])
+        
+        # # # # # tileIndex = imStack.getStackIndex(0, 0, imId + 1) # to access the slice in the stack
+        # # # # # finalIm = ImagePlus('finalLM_' + channel + '_' + str(layerId).zfill(4), stack.getProcessor(tileIndex).convertToByteProcessor())
+        # # # # # finalImPath = os.path.join(finalLMFolder, 'finalLM_' + channel + '_' + str(layerId).zfill(4) + '.tif')
+        # # # # # IJ.save(finalIm, finalImPath)
 
 # # # # # # copy the brightfield and contrasted brightfield channels
 # # # # # for channel in channels[-2:]: 
-	# # # # # affineCroppedFolder = os.path.join(LMFolder, 'affineCropped_' + channel)
-	# # # # # finalLMFolder = fc.mkdir_p(os.path.join(LMFolder, 'finalLM_' + channel))
-	# # # # # copy_tree(affineCroppedFolder, finalLMFolder)
-	# # # # # for imName in os.listdir(finalLMFolder):
-		# # # # # imPath = os.path.join(finalLMFolder, imName)
-		# # # # # newImName = imName.replace('affineCropped_', 'finalLM_')
-		# # # # # newImPath = os.path.join(finalLMFolder, newImName)
-		# # # # # os.rename(imPath, newImPath)
+    # # # # # affineCroppedFolder = os.path.join(LMFolder, 'affineCropped_' + channel)
+    # # # # # finalLMFolder = fc.mkdir_p(os.path.join(LMFolder, 'finalLM_' + channel))
+    # # # # # copy_tree(affineCroppedFolder, finalLMFolder)
+    # # # # # for imName in os.listdir(finalLMFolder):
+        # # # # # imPath = os.path.join(finalLMFolder, imName)
+        # # # # # newImName = imName.replace('affineCropped_', 'finalLM_')
+        # # # # # newImPath = os.path.join(finalLMFolder, newImName)
+        # # # # # os.rename(imPath, newImPath)
 
 fc.terminatePlugin(namePlugin, MagCFolder)
