@@ -19,7 +19,14 @@ except Exception, e:
 	orderPath = os.path.join(MagCFolder, filter(lambda x: 'solution' in x, os.listdir(MagCFolder))[0])
 
 sectionOrder = fc.readOrder(orderPath)
+
+BIBMode = True
+if BIBMode:
+	sectionOrder = [o/2 for o in sectionOrder[::2]]
+
 IJ.log('sectionOrder: ' + str(sectionOrder))
+
+
 
 MagCParams = fc.readMagCParameters(MagCFolder)
 

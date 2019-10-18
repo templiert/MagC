@@ -213,10 +213,10 @@ pipeline = [
 
 #['init EM', 0],
 #['downsample EM', 0],
-['assembly lowEM', 0],
-['assembly EM', 0],
-['montage ElasticEM', 1], # fails in java8
-['export stitchedEMForAlignment', 0],
+#['assembly lowEM', 0],
+#['assembly EM', 0],
+#['montage ElasticEM', 1], # fails in java8
+#['export stitchedEMForAlignment', 0],
 #['reorder postElasticMontage', 0],
 #['alignRigid EM', 0],
 #['alignElastic EM', 0],
@@ -224,7 +224,7 @@ pipeline = [
 
 ### LM-EM registration###
 
-# ['compute RegistrationMovingLeastSquares', 1], #fiji8 fails to save MLS transforms
+['compute RegistrationMovingLeastSquares', 1], #fiji8 fails to save MLS transforms
 # ['export TransformedCroppedLM', 0],
 # ['assembly LMProjects', 1], #java8 fails to apply coordinateTransforms
 

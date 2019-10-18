@@ -16,8 +16,6 @@ from ini.trakem2 import Project, ControlWindow
 from ini.trakem2.display import Patch
 from ini.trakem2.imaging import Blending
 from mpicbg.trakem2.align import RegularizedAffineLayerAlignment
-from bunwarpj.bUnwarpJ_ import computeTransformationBatch, elasticTransformImageMacro
-from bunwarpj import MiscTools
 
 from mpicbg.ij import SIFT
 from mpicbg.imagefeatures import FloatArray2DSIFT
@@ -74,7 +72,8 @@ def getMatchingResults(features1, features2):
 	# FeatureTransform.matchFeatures(features1, features2, candidates, 0.95)
 	model = AffineModel2D()
 	try:
-		modelFound = model.filterRansac(candidates, inliers, 1000, 10, 0, 7) # (candidates, inliers, iterations, maxDisplacement, ratioOfConservedFeatures, minNumberOfConservedFeatures)
+		modelFound = model.filterRansac(candidates, inliers, 1000, 10, 0, 7) 
+	#(candidates, inliers, iterations, maxDisplacement, ratioOfConservedFeatures, minNumberOfConservedFeatures)
 	except NotEnoughDataPointsException, e:
 		modelFound = False
 		IJ.log('NotEnoughDataPointsException')
@@ -94,14 +93,18 @@ def getScalingFactors(aff):
 	
 def computeRegistration():
 	while atomicI.get() < nSections:
-		k = atomicI.getAndIncrement()
-		if k < nSections:
-			l = k
+		l = atomicI.getAndIncrement()
+		if l < nSections:
 			IJ.log('Computing EM/LM registration for layer ' + str(l).zfill(4))
 
-			layerFolder = fc.mkdir_p(os.path.join(registrationFolder, 'layer_' + str(l).zfill(4)))
-			toRegisterFolder = fc.mkdir_p(os.path.join(layerFolder, 'toRegister'))
-			registeredFolder = fc.mkdir_p(os.path.join(layerFolder, 'registered'))
+			layerFolder = fc.mkdir_p(
+				os.path.join(registrationFolder, 
+						'layer_' + str(l).zfill(4)))
+			toRegisterFolder = fc.mkdir_p(
+				os.path.join(layerFolder, 
+						'toRegister'))
+			registeredFolder = fc.mkdir_p(
+					os.path.join(layerFolder, 'registered'))
 
 			# Applying appropriate filters to make lowresEM and LM look similar for layer l
 			imLM = IJ.openImage(imPaths['LM'][l])
@@ -111,6 +114,7 @@ def computeRegistration():
 
 			imEM = IJ.openImage(imPaths['EM'][l])
 			imEM = fc.localContrast(imEM)
+			imEM = fc.blur(im, 2)
 			imEMPath = os.path.join(toRegisterFolder, 'imEM_' + str(l).zfill(4) + '.tif')
 			IJ.save(imEM, imEMPath)
 
@@ -145,8 +149,8 @@ def computeRegistration():
 			if not firstStepRegistered:
 				IJ.log('First step registration in layer ' + str(l).zfill(4) + ' with few features has failed. Trying with more features.')
 				# registration at first step with 3steps/octave (more features)
-				# pLowRes = getSIFTMatchingParameters(3, 1.6, 64, 4000, 8, 4)
-				pLowRes = getSIFTMatchingParameters(nOctaves[0], 1.6, 16, 4000, 8, 4) # for BIB
+				pLowRes = getSIFTMatchingParameters(3, 1.6, 64, 4000, 8, 4)
+				#pLowRes = getSIFTMatchingParameters(nOctaves[0], 1.6, 16, 4000, 8, 4) # for BIB
 
 
 				featuresLM = getFeatures(imLMPath, pLowRes)
@@ -245,8 +249,18 @@ registrationFolder = fc.mkdir_p(os.path.join(os.path.dirname(projectPath), 'LMEM
 
 
 imPaths = {}
-imPaths['EM'] = [os.path.join(exportedEMFolder, imageName) for imageName in fc.naturalSort(os.listdir(exportedEMFolder)) if os.path.splitext(imageName)[1] == '.tif']
-imPaths['LM'] = [os.path.join(exportedLMFolder, imageName) for imageName in fc.naturalSort(os.listdir(exportedLMFolder)) if os.path.splitext(imageName)[1] == '.tif']
+imPaths['EM'] = [os.path.join(exportedEMFolder, imageName) 
+	for i,imageName 
+	in enumerate(
+		fc.naturalSort(
+		os.listdir(
+		exportedEMFolder))) 
+	if (os.path.splitext(imageName)[1] == '.tif'
+		and i%2 == 0)]
+imPaths['LM'] = [os.path.join(exportedLMFolder, imageName) 
+	for imageName 
+	in fc.naturalSort(os.listdir(exportedLMFolder)) 
+	if os.path.splitext(imageName)[1] == '.tif']
 
 # surfaceIds = [0,16,32,48,65,81,97,113,129,145,162,179,195,211,227,243,260,276,293,310] # optimal 16-17
 # imPaths['EM'] = [imPaths['EM'][i] for i in surfaceIds]
@@ -263,7 +277,7 @@ f.close()
 registrationStatsPath = os.path.join(registrationFolder, 'registrationStats')
 registrationStats = []
 
-# create dummy trkem for applying affine and cropping LM in the first registration step
+# create dummy trakem for applying affine and cropping LM in the first registration step
 pZ, loaderZ, layersetZ, nLayersZ = fc.getProjectUtils(fc.initTrakem(temporaryFolder, 1))
 layersetZ.setDimensions(0, 0, widthEM * 5, heightEM * 5)
 layerZ = layersetZ.getLayers().get(0)
