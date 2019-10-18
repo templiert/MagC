@@ -54,6 +54,9 @@ boxFactor = 0.5
 # /!\ Scalefactor 1 should always be included, as these images are used for LM/EM registration
 scaleFactors = [0.1,1]
 
+# flip horizontally the final export for registration
+flipX = False
+
 ####################################
 ##### Plugin downsample_EM #####
 ####################################

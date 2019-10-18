@@ -28,6 +28,7 @@ width, height, nChannels, xGrid, yGrid, scaleX, scaleY, channels = fc.readSessio
 
 MagCParameters = fc.readMagCParameters(MagCFolder)
 scaleFactors = MagCParameters[namePlugin]['scaleFactors'] # scale factor for export, typically 1 and 0.1
+flipX = MagCParameters[namePlugin]['flipX']
 
 IJ.log('Iterating over the LM channels')
 for channel in channels:
@@ -48,7 +49,10 @@ for channel in channels:
 		l = int(transforms[i+1])
 		alignedPatchName = os.path.basename(alignedPatchPath)
 
-		toAlignPatchPath = fc.cleanLinuxPath(os.path.join(os.path.dirname(alignedPatchPath), alignedPatchName.replace(channels[-1], channel)))
+		toAlignPatchPath = fc.cleanLinuxPath(
+            os.path.join(
+                os.path.dirname(alignedPatchPath),
+                alignedPatchName.replace(channels[-1], channel)))
 		toAlignPatchPath = toAlignPatchPath[:-1]  # remove a mysterious trailing character ...
 		IJ.log('In channel ' + str(channel) + ', inserting this image: ' + str(toAlignPatchPath))
 		aff = AffineTransform([float(transforms[a]) for a in range(i+2, i+8)])
@@ -67,8 +71,16 @@ for channel in channels:
 	IJ.log('Exporting')
 	for scaleFactor in scaleFactors:
 		theBaseName = 'exported_downscaled_' + str(int(1/float(scaleFactor))) + '_' + channel
-		outputFolder = fc.mkdir_p( os.path.join(os.path.dirname(transformsPath), theBaseName))
-		fc.exportFlat(project,outputFolder,scaleFactor, baseName = theBaseName, bitDepth = 8)
+		outputFolder = fc.mkdir_p(
+            os.path.join(
+                os.path.dirname(transformsPath),
+                theBaseName))
+		fc.exportFlat(project,
+                    outputFolder,
+                    scaleFactor,
+                    baseName=theBaseName,
+                    bitDepth = 8,
+                    flipX=flipX)
 		
 	fc.closeProject(project)
 
