@@ -224,8 +224,8 @@ pipeline = [
 
 ### LM-EM registration###
 
-['compute RegistrationMovingLeastSquares', 1], #fiji8 fails to save MLS transforms
-# ['export TransformedCroppedLM', 0],
+#['compute RegistrationMovingLeastSquares', 1], #fiji8 fails to save MLS transforms
+['export TransformedCroppedLM', 0],
 # ['assembly LMProjects', 1], #java8 fails to apply coordinateTransforms
 
 ]

@@ -520,8 +520,8 @@ def exportFlat(project,outputFolder,scaleFactor, baseName = '', bitDepth = 8, la
 				imp = loader.getFlatImage(layer,roiExport,scaleFactor, 0x7fffffff, ImagePlus.GRAY16, Patch, layer.getAll(Patch), True, Color.black, None)
 			savePath = os.path.join(outputFolder, baseName + '_' + str(l).zfill(4) + '.tif')
 			if flipX:
-                IJ.run(imp, 'Flip Horizontally', '')
-            IJ.save(imp, savePath)
+				IJ.run(imp, 'Flip Horizontally', '')
+			IJ.save(imp, savePath)
 			IJ.log('Layer ' + str(l) +' flat exported to ' + savePath)
 			imp.close()
 

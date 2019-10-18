@@ -114,7 +114,7 @@ def computeRegistration():
 
 			imEM = IJ.openImage(imPaths['EM'][l])
 			imEM = fc.localContrast(imEM)
-			imEM = fc.blur(im, 2)
+			imEM = fc.blur(imEM, 2)
 			imEMPath = os.path.join(toRegisterFolder, 'imEM_' + str(l).zfill(4) + '.tif')
 			IJ.save(imEM, imEMPath)
 
