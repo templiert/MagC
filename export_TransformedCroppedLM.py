@@ -79,7 +79,12 @@ for l in range(nLayers):
 		for channel in channels:
 			affineCroppedFolder = os.path.join(LMFolder, 'affineCropped_' + channel)
 
-			LMMosaicsPath = fc.cleanLinuxPath(os.path.join(LMFolder, 'exported_downscaled_1_' + channel, 'exported_downscaled_1_' + channel + '_' + str(l).zfill(4) + '.tif'))
+			LMMosaicsPath = fc.cleanLinuxPath(
+                os.path.join(
+                    LMFolder,
+                    'exported_downscaled_1_' + channel,
+                    'exported_downscaled_1_' + channel 
+                    + '_' + str(l).zfill(4) + '.tif'))
 			
 			patch = Patch.createPatch(pZ, LMMosaicsPath)
 			layerZ.add(patch)
@@ -88,8 +93,29 @@ for l in range(nLayers):
 			patch.updateBucket()
 
 			bb = Rectangle(0, 0, widthEM, heightEM)
-			affineCroppedIm = loaderZ.getFlatImage(layerZ, bb, 1, 0x7fffffff, ImagePlus.GRAY8, Patch, layerZ.getAll(Patch), True, Color.black, None)
-			affineCroppedImPath = os.path.join(affineCroppedFolder, 'affineCropped_' + channel + '_' + str(l).zfill(4) + '.tif')
+			affineCroppedIm = loaderZ.getFlatImage(
+                layerZ,
+                bb,
+                1,
+                0x7fffffff,
+                ImagePlus.GRAY8,
+                Patch,
+                layerZ.getAll(Patch),
+                True,
+                Color.black,
+                None)
+			affineCroppedIm = fc.normLocalContrast(
+                affineCroppedIm,
+                50,
+                50,
+                3,
+                True,
+                True))
+            IJ.run(affineCroppedIm, 'Median...', 'radius=2')
+            affineCroppedImPath = os.path.join(
+                affineCroppedFolder,
+                'affineCropped_' + channel 
+                + '_' + str(l).zfill(4) + '.tif')
 			IJ.save(affineCroppedIm, affineCroppedImPath)
 			affineCroppedIm.close()
 
