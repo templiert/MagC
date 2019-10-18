@@ -504,7 +504,7 @@ def initProject(path, nbLayers, mipmaps = False): #initialize a project
 	IJ.log('TrakEM project initialized with ' + str(nbLayers) + ' layers and stored in ' + path + ' (but not saved yet)')
 	return project, loader, layerset
 
-def exportFlat(project,outputFolder,scaleFactor, baseName = '', bitDepth = 8, layers = [], roi = ''):
+def exportFlat(project,outputFolder,scaleFactor, baseName = '', bitDepth = 8, layers = [], roi = '', flipX=False):
 	layerset = project.getRootLayerSet()
 	loader = project.getLoader()
 	for l,layer in enumerate(layerset.getLayers()):
@@ -519,7 +519,9 @@ def exportFlat(project,outputFolder,scaleFactor, baseName = '', bitDepth = 8, la
 			elif bitDepth == 16:
 				imp = loader.getFlatImage(layer,roiExport,scaleFactor, 0x7fffffff, ImagePlus.GRAY16, Patch, layer.getAll(Patch), True, Color.black, None)
 			savePath = os.path.join(outputFolder, baseName + '_' + str(l).zfill(4) + '.tif')
-			IJ.save(imp, savePath)
+			if flipX:
+                IJ.run(imp, 'Flip Horizontally', '')
+            IJ.save(imp, savePath)
 			IJ.log('Layer ' + str(l) +' flat exported to ' + savePath)
 			imp.close()
 
