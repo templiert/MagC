@@ -1,0 +1,12 @@
+{"num_channels": 1, "scales": [
+	{"resolution": [2, 7, 50], "chunk_sizes": [[512, 512, 5]], "voxel_offset": [0, 0, 0], "key": "7nm", "encoding": "raw", "size": [1024, 1024, 5]},
+	{"resolution": [4, 14, 50], "chunk_sizes": [[512, 512, 5]], "voxel_offset": [0, 0, 0],"key": "14nm", "encoding": "raw", "size": [1024, 1024, 5]},
+	{"resolution": [8, 28, 50], "chunk_sizes": [[512, 512, 5]], "voxel_offset": [0, 0, 0],"key": "28nm", "encoding": "raw", "size": [1024, 1024, 5]},
+	{"resolution": [16, 56, 50], "chunk_sizes": [[512, 512, 5]], "voxel_offset": [0, 0, 0],"key": "56nm", "encoding": "raw", "size": [1024, 1024, 5]},
+	{"resolution": [32, 56, 50], "chunk_sizes": [[512, 512, 5]], "voxel_offset": [0, 0, 0],"key": "56nm", "encoding": "raw", "size": [1024, 1024, 5]},
+	{"resolution": [64, 56, 50], "chunk_sizes": [[512, 512, 5]], "voxel_offset": [0, 0, 0],"key": "56nm", "encoding": "raw", "size": [1024, 1024, 5]},
+	{"resolution": [128, 56, 50], "chunk_sizes": [[512, 512, 5]], "voxel_offset": [0, 0, 0],"key": "56nm", "encoding": "raw", "size": [1024, 1024, 5]},
+	{"resolution": [256, 56, 50], "chunk_sizes": [[512, 512, 5]], "voxel_offset": [0, 0, 0],"key": "56nm", "encoding": "raw", "size": [1024, 1024, 5]},
+	{"resolution": [512, 56, 50], "chunk_sizes": [[512, 512, 5]], "voxel_offset": [0, 0, 0],"key": "56nm", "encoding": "raw", "size": [1024, 1024, 5]},
+	{"resolution": [1024,112, 50], "chunk_sizes": [[512, 512, 5]], "voxel_offset": [0, 0, 0], "key": "112nm", "encoding": "raw", "size": [1024, 1024, 5]}],
+"data_type": "uint8", "type": "image"}
