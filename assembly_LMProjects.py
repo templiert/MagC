@@ -12,8 +12,7 @@ from java.util import HashSet, ArrayList
 from java.awt.geom import AffineTransform
 from ini.trakem2 import Project, ControlWindow
 from ini.trakem2.display import Patch
-from bunwarpj.bUnwarpJ_ import computeTransformationBatch, elasticTransformImageMacro
-from bunwarpj import MiscTools
+
 import sys
 sys.path.append(IJ.getDirectory('plugins'))
 import fijiCommon as fc 
@@ -21,7 +20,6 @@ import fijiCommon as fc
 from register_virtual_stack import Transform_Virtual_Stack_MT
 
 from ini.trakem2.io import CoordinateTransformXML
-
 
 namePlugin = 'assembly_LMProjects'
 MagCFolder = fc.startPlugin(namePlugin)
@@ -59,7 +57,6 @@ for idChannel, channel in enumerate(channels):
 	p.saveAs(projectPath, True)
 	layerset.setDimensions(0, 0, width0, height0)
 	
-	
 	for l, layer in enumerate(layerset.getLayers()):
 		layerFolder = os.path.join(registrationFolder, 'layer_' + str(l).zfill(4))
 		registeredFolder = os.path.join(layerFolder, 'registered')
@@ -73,6 +70,7 @@ for idChannel, channel in enumerate(channels):
 			IJ.log('Setting the mlsTransform in layer ' + str(l) + ' ' + str(MLSTransform))
 			patch.updateBucket()
 			
+			IJ.log('idChannel ************* ' + str(idChannel))
 			if idChannel < len(channels)-2: # if it is a fluochannel
 				MLSTransformedFolder = fc.mkdir_p(os.path.join(LMFolder, 'MLS_Transformed_' + str(channel), ''))
 				imp = loader.getFlatImage(layer, roiExport, 1, 0x7fffffff, ImagePlus.GRAY8, Patch, layer.getAll(Patch), True, Color.black, None)

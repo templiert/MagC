@@ -110,7 +110,7 @@ for l in range(nLayers):
                 50,
                 3,
                 True,
-                True))
+                True)
             IJ.run(affineCroppedIm, 'Median...', 'radius=2')
             affineCroppedImPath = os.path.join(
                 affineCroppedFolder,
