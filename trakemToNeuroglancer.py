@@ -379,12 +379,20 @@ for trakemProjectPath in trakemProjectPaths:
 
         # get the dimensions of the render universe
         level0MipmapFolder = os.path.join(mipmapFolderDirect, '0')
-        maxRow, maxCol = np.array(getMaxRowMaxCol(level0MipmapFolder)) * mipmapSize
-        print(maxRow, maxCol)
+        # maxRow, maxCol = np.array(getMaxRowMaxCol(level0MipmapFolder)) * mipmapSize
+        maxRow, maxCol = getMaxRowMaxCol(level0MipmapFolder)
+        maxRow = (maxRow + 1) * mipmapSize
+        maxCol = (maxCol + 1) * mipmapSize
+        print(maxRow, maxCol)        
+        
+        
+        print('maxRow, maxCol', maxRow, maxCol)
 
         for idScale, scale in enumerate(info['scales']):
             resolution = pixelSize * 2**idScale # pixel size increases with powers of 2
-            scale['resolution'] = [resolution, resolution, 50]
+            scale['resolution'] = [resolution,
+                                    resolution,
+                                    50]
             scale['chunk_sizes'] = [[chunkSize[0],
                                     chunkSize[1],
                                     min(nSections, chunkSize[2])
@@ -392,7 +400,9 @@ for trakemProjectPath in trakemProjectPaths:
             scale['key'] = str(resolution) + 'nm'
             scale['encoding'] = 'raw'
             # adding a *1.5 because I do not understand why otherwise the volume gets truncated at low resolution ...
-            scale['size'] = [ int((maxCol // 2**idScale)*1.5) , int((maxRow // 2**idScale)*1.5), nSections] # integers specifying the x, y, and z dimensions of the volume in voxels
+            scale['size'] = [ int((maxCol // 2**idScale)*1.5) ,
+                            int((maxRow // 2**idScale)*1.5),
+                            nSections] # integers specifying the x, y, and z dimensions of the volume in voxels
             info['scales'][idScale] = scale
 
         with open(infoPath, 'w') as f:
