@@ -60,26 +60,33 @@ def renderImportJson(path):
         cwd = renderFolder)
     p.wait()
 
+def noStartingDoubleSep(p):
+    if p[:2] == os.sep + os.sep:
+        return p[1:]
+    else:
+        return p
+
+
 ### Dataset parameters ### (# weird offset when LMResolutionLevels = 3, just take 2 instead)
 # EMPixelSize, LMEMFactor, datasetName, LMResolutionLevels, EMResolutionLevels, nMipmapThreads = 8, 10, 'B6', 3, 7, 9
 # EMPixelSize, LMEMFactor, datasetName, LMResolutionLevels, EMResolutionLevels, nMipmapThreads = 8, 13, 'C1', 4, 7, 9
-EMPixelSize, LMEMFactor, datasetName, LMResolutionLevels, EMResolutionLevels, nMipmapThreads = 10, 10, 'wafer_16', 4, 7, 50
+EMPixelSize, LMEMFactor, datasetName, LMResolutionLevels, EMResolutionLevels, nMipmapThreads = 10, 10, 'wafer_16', 4, 7, 20
 
 ### What to run in the script ###
-XML_to_JSON = 1
+XML_to_JSON = 0
 JSON_to_Render = 0
 Render_to_Mipmaps = 0
-Mipmaps_to_Precomputed = 0
-doEM = 0
-doLM = 1
+Mipmaps_to_Precomputed = 1
+doEM = 1
+doLM = 0
 ### ###
 
 visualizationMode = 'online' # 'online' for gs, or 'local' with the HBP docker
 chunkSize = [64, 64, 64]
 
 mipmapSize = 2048 # size of the Render mipmap files
+nWorkersJsonToRender = 5
 nThreadsMipmapToPrecomputed = 30
-nWorkersJsonToRender = 30
 
 MagCFolder = os.path.join(r'/home/thomas_templier2_gmail_com/data/wafer_16_left/wafer_16_left_MagCFolder', '')
 
@@ -119,20 +126,21 @@ try:
                     os.path.join(MagCFolder, 'EMData')))[0][1]) 
 except Exception as e:
     nSections = int(raw_input('How many sections are there ?'))
+print('There are ', nSections, 'sections')
 
 MagC_LM_Folder = os.path.join(MagCFolder, 'MagC_LM')
 MagC_EM_Folder = os.path.join(MagCFolder, 'MagC_EM')
-    
+
 trakemProjectPaths = [os.path.join(MagC_LM_Folder, f)
     for f in os.listdir(MagC_LM_Folder) 
     if (os.path.splitext(f)[1] == '.xml'
-        and 'LMProject_' in f)]
-    + [os.path.join(MagC_EM_Folder, f) for f
-    in os.listdir(MagC_EM_Folder)
+        and 'LMProject_' in f)] \
+    + [os.path.join(MagC_EM_Folder, f)
+    for f in os.listdir(MagC_EM_Folder)
     if 'ElasticAlignedEMProject.xml' in f]
-        
+
 for trakemProjectPath in trakemProjectPaths:
-    trakemProjectFileName = os.path.basename(trakemProjectFileName)
+    trakemProjectFileName = os.path.basename(trakemProjectPath)
     print('trakemProjectFileName', trakemProjectFileName)
 
     if ('LM' in trakemProjectFileName) and doLM:
@@ -142,15 +150,15 @@ for trakemProjectPath in trakemProjectPaths:
         if 'LMProject' in trakemProjectFileName:
             dataFolder = os.path.join(MagC_LM_Folder,
                 'affineCropped_' + channelName)
-            stackName = datasetName
+            stackName = (datasetName
                         + '_LM_' 
-                        + channelName
+                        + channelName)
         elif 'Segmented' in trakemProjectFileName:
             dataFolder = os.path.join(MagC_LM_Folder,
                 'segmentedTracks_' + channelName)
-            stackName = datasetName 
+            stackName = (datasetName 
                         + '_SegmentedLM_'
-                        + channelName
+                        + channelName)
         else:
             print('Error in reading an LM project - exit')
             sys.exit()
@@ -171,7 +179,7 @@ for trakemProjectPath in trakemProjectPaths:
         channelName = ''
     else:
         print('Either nothing to do (check doLM and doEM), or error because the trakem xml file should contain "LM" or "EM"')
-        exit()
+        continue
 
     print('\n *** \nProcessing stack', stackName, 
         '\n', 'with pixelSize', pixelSize, 
@@ -202,7 +210,7 @@ for trakemProjectPath in trakemProjectPaths:
             # add a <ict_transform_list> </ict_transform_list> around the MLST
         trakemProjectCorrectedPath = os.path.join(outputFolder,
                                         stackName + '_Corrected.xml')
-        with open(trakemProjectPath, 'r') as f,
+        with open(trakemProjectPath, 'r') as f, \
             open(trakemProjectCorrectedPath, 'w') as g:
             for line in f:
                 if 'LMProject' in trakemProjectFileName:
@@ -232,7 +240,7 @@ for trakemProjectPath in trakemProjectPaths:
         jsonCorrectedPath = os.path.join(outputFolder,
                                 stackName + '_Corrected.json')
 
-        with open(jsonPath, 'r') as f,
+        with open(jsonPath, 'r') as f, \
             open(jsonCorrectedPath, 'w') as g:
             for idLine, line in enumerate(f):
                 # trakem2.converter adds an unnecessary comma when the first trakem layer is empty
@@ -242,17 +250,24 @@ for trakemProjectPath in trakemProjectPaths:
                 elif 'imageUrl' in line:
                     print('correcting line : ', line)
                     if 'EM' in trakemProjectFileName:
-                        splitted = line.split('EMData')
-                        line = splitted[0] + 'EMData' + splitted[2]
+#                        splitted = line.split('EMData')
+#                        line = splitted[0] + 'EMData' + splitted[2]
+                        splitted = line.split('file:')
+                        newPath = os.path.normpath(splitted[1].replace('"\n', ''))
+                        newPath = noStartingDoubleSep(newPath)
+                        line = splitted[0] + 'file:' + newPath + '"\n'
+
                     if 'LM' in trakemProjectFileName:
                         splitted = line.split('file:')
-                        pathParts = list(Path(splitted[1].replace('"\n', '')).parts)
-                        del pathParts[-2]
-                        newPath = os.path.join(*pathParts)
+                        #pathParts = list(Path(splitted[1].replace('"\n', '')).parts)
+                        ##del pathParts[-2]
+                        #newPath = os.path.join(*pathParts)
+                        newPath = os.path.normpath(splitted[1].replace('"\n', ''))
+                        newPath = noStartingDoubleSep(newPath)
                         line = splitted[0] + 'file:' + newPath + '"\n'
                         # "imageUrl" : "file:/home/thomas/research/trakemToNeuroglancerProjects/firstMinimalTest/input/finalLM_brightfield/finalLM_brightfield/finalLM__brightfield_0001.tif"
                     print('corrected line : ', line)
-                    
+
                 # correct the wrongly added transform by the converter: revert to identity
                 elif ('LM' in trakemProjectFileName
                     and '"dataString" : "1.0' in line):
@@ -296,9 +311,9 @@ for trakemProjectPath in trakemProjectPaths:
                                         + str(id).zfill(4) 
                                         + '_splitJson.json')
                 splitJsonPaths.append(splitJsonPath)
-                if not os.path.isfile(splitJsonPath):
-                    with open(splitJsonPath, 'w') as g:
-                        json.dump(splitJson, g, indent=4)
+#                if not os.path.isfile(splitJsonPath):
+                with open(splitJsonPath, 'w') as g:
+                    json.dump(splitJson, g, indent=4)
 
         p = subprocess.Popen([os.path.join(renderScriptsFolder,
                                 'manage_stacks.sh'),
@@ -364,8 +379,7 @@ for trakemProjectPath in trakemProjectPaths:
 
         # get the dimensions of the render universe
         level0MipmapFolder = os.path.join(mipmapFolderDirect, '0')
-        maxRow, maxCol = np.array(getMaxRowMaxCol(level0MipmapFolder))
-                        * mipmapSize
+        maxRow, maxCol = np.array(getMaxRowMaxCol(level0MipmapFolder)) * mipmapSize
         print(maxRow, maxCol)
 
         for idScale, scale in enumerate(info['scales']):
