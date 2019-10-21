@@ -78,13 +78,13 @@ def noStartingDoubleSep(p):
 ### Dataset parameters ### (# weird offset when LMResolutionLevels = 3, just take 2 instead)
 # EMPixelSize, LMEMFactor, datasetName, LMResolutionLevels, EMResolutionLevels, nMipmapThreads = 8, 10, 'B6', 3, 7, 9
 # EMPixelSize, LMEMFactor, datasetName, LMResolutionLevels, EMResolutionLevels, nMipmapThreads = 8, 13, 'C1', 4, 7, 9
-EMPixelSize, LMEMFactor, datasetName, LMResolutionLevels, EMResolutionLevels, nMipmapThreads = 10, 10, 'wafer_16', 4, 7, 20
+EMPixelSize, LMEMFactor, datasetName, LMResolutionLevels, EMResolutionLevels, nMipmapThreads = 10, 10, 'wafer_16', 4, 7, 40
 
 ### What to run in the script ###
 XML_to_JSON = 0
 JSON_to_Render = 0
-Render_to_Mipmaps = 0
-Mipmaps_to_Precomputed = 1
+Render_to_Mipmaps = 1
+Mipmaps_to_Precomputed = 0
 doEM = 1
 doLM = 0
 ### ###
@@ -424,7 +424,8 @@ for trakemProjectPath in trakemProjectPaths:
 
         with open(infoPath, 'w') as f:
             json.dump(info, f)
-
+        print('info ---------------', info)
+'''
         start = time.perf_counter()
         processes = []
         for threadId in range(nThreadsMipmapToPrecomputed):
@@ -442,7 +443,7 @@ for trakemProjectPath in trakemProjectPaths:
         print('Mipmap to precomputed took: ',
             time.perf_counter() - start,
             ' seconds')
-
+'''
 #####################
 ### Visualization ###
 #####################
