@@ -16,6 +16,14 @@ from concurrent.futures import ThreadPoolExecutor
 import xml.etree.cElementTree as ET
 import numpy as np
 
+def readIds(p):
+    with open(p, 'r') as f:
+        lines = f.readlines()
+    return [
+        int(l.replace('\n', ''))
+        for l in lines
+        ]
+
 def getSubFoldersNames(folder):
     return sorted([name for name in os.listdir(folder)
             if os.path.isdir(os.path.join(folder, name))])
@@ -89,6 +97,15 @@ nWorkersJsonToRender = 5
 nThreadsMipmapToPrecomputed = 30
 
 MagCFolder = os.path.join(r'/home/thomas_templier2_gmail_com/data/wafer_16_left/wafer_16_left_MagCFolder', '')
+
+BIB = False
+ordered_surface_ids_path = [os.path.join(MagCFolder, n)
+    for n in os.listdir(MagCFolder)
+    if 'ordered_surface_ids' in n]
+if len(ordered_surface_ids_path) != 0:
+    ordered_surface_ids_path = ordered_surface_ids_path[0]
+    ordered_surface_ids = readIds(ordered_surface_ids_path)
+    BIB = True
 
 #################################
 ### Manual configuration once ###
